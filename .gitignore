@@ -1,0 +1,17 @@
+# Ignorar configuración local de la BD
+app/config/database.php
+
+# Dependencias de sistemas
+vendor/
+node_modules/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs del servidor
+*.log
+
+# Variables de entorno
+.env
+.env.*
