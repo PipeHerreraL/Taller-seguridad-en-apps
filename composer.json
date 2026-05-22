@@ -34,7 +34,8 @@
         "test:sql": "Corre solo los tests de SQL Injection",
         "test:validator": "Corre solo los tests del Validator",
         "test:coverage": "Reporte de cobertura de código (requiere Xdebug)",
-        "db:init": "Crea la base de datos y la tabla en MySQL"
+        "db:init": "Crea la base de datos y la tabla en MySQL",
+        "pint": "Formatea el código de todo el proyecto según PSR-12"
     },
     "config": {
         "sort-packages": true,
