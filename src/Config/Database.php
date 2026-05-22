@@ -16,13 +16,18 @@ use PDOException;
 class Database
 {
     private static ?Database $instance = null;
+
     private PDO $connection;
 
     // Parámetros de conexión cargados desde variables de entorno
     private string $host;
+
     private string $dbName;
+
     private string $username;
+
     private string $password;
+
     private string $charset;
 
     /**
@@ -32,24 +37,24 @@ class Database
      */
     private function __construct()
     {
-        $this->host     = $_ENV['DB_HOST']     ?? getenv('DB_HOST')     ?: 'localhost';
-        $this->dbName   = $_ENV['DB_DATABASE'] ?? getenv('DB_DATABASE') ?: 'clinica_db';
+        $this->host = $_ENV['DB_HOST'] ?? getenv('DB_HOST') ?: 'localhost';
+        $this->dbName = $_ENV['DB_DATABASE'] ?? getenv('DB_DATABASE') ?: 'clinica_db';
         $this->username = $_ENV['DB_USERNAME'] ?? getenv('DB_USERNAME') ?: 'root';
         $this->password = $_ENV['DB_PASSWORD'] ?? getenv('DB_PASSWORD') ?: '';
-        $this->charset  = $_ENV['DB_CHARSET']  ?? getenv('DB_CHARSET')  ?: 'utf8mb4';
-        $port           = $_ENV['DB_PORT']     ?? getenv('DB_PORT')     ?: null;
+        $this->charset = $_ENV['DB_CHARSET'] ?? getenv('DB_CHARSET') ?: 'utf8mb4';
+        $port = $_ENV['DB_PORT'] ?? getenv('DB_PORT') ?: null;
 
         $hostStr = $this->host;
-        if (!empty($port)) {
+        if (! empty($port)) {
             $hostStr .= ";port={$port}";
         }
 
         $dsn = "mysql:host={$hostStr};dbname={$this->dbName};charset={$this->charset}";
 
         $options = [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false, // Consultas preparadas reales (anti SQL Injection)
+            PDO::ATTR_EMULATE_PREPARES => false, // Consultas preparadas reales (anti SQL Injection)
         ];
 
         $this->connection = new PDO($dsn, $this->username, $this->password, $options);
@@ -61,8 +66,9 @@ class Database
     public static function getInstance(): Database
     {
         if (self::$instance === null) {
-            self::$instance = new self();
+            self::$instance = new self;
         }
+
         return self::$instance;
     }
 
@@ -76,5 +82,6 @@ class Database
 
     // Previene clonación y deserialización
     private function __clone() {}
+
     public function __wakeup(): void {}
 }

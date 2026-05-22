@@ -3,12 +3,12 @@ declare(strict_types=1);
 /**
  * views/404.php — Vista: Página de error 404.
  */
-require_once __DIR__ . '/../autoload.php';
+require_once __DIR__.'/../autoload.php';
 
-$title = "Página no encontrada — ClinicaApp";
-$description = "La página solicitada no existe.";
+$title = 'Página no encontrada — ClinicaApp';
+$description = 'La página solicitada no existe.';
 $activeTab = '';
-include __DIR__ . '/templates/header.php';
+include __DIR__.'/templates/header.php';
 ?>
 <main class="container">
   <div class="error-container">
@@ -29,5 +29,5 @@ include __DIR__ . '/templates/header.php';
 </main>
 
 <?php
-include __DIR__ . '/templates/footer.php';
+include __DIR__.'/templates/footer.php';
 ?>

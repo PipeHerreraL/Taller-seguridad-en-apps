@@ -38,12 +38,12 @@ class Logger
         }
 
         // Definir directorio y archivo de log en la raíz del proyecto
-        $logDir = __DIR__ . '/../../logs';
-        if (!is_dir($logDir)) {
+        $logDir = __DIR__.'/../../logs';
+        if (! is_dir($logDir)) {
             @mkdir($logDir, 0755, true);
         }
 
-        $logFile = $logDir . '/app.log';
+        $logFile = $logDir.'/app.log';
         $timestamp = date('Y-m-d H:i:s');
         $logLine = sprintf("[%s] %s - %s %s - Status: %d\n", $timestamp, $ip, $method, $uriClean, $status);
 

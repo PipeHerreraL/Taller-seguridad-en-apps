@@ -13,15 +13,15 @@ class EnvLoader
     /**
      * Carga el archivo .env especificado.
      *
-     * @param string $path Ruta absoluta al archivo .env
+     * @param  string  $path  Ruta absoluta al archivo .env
      */
     public static function load(string $path): void
     {
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             return;
         }
 
-        if (!is_readable($path)) {
+        if (! is_readable($path)) {
             return;
         }
 

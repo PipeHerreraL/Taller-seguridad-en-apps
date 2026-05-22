@@ -3,34 +3,34 @@ declare(strict_types=1);
 /**
  * views/index.php — Vista: Página de registro de pacientes.
  */
-require_once __DIR__ . '/../autoload.php';
+require_once __DIR__.'/../autoload.php';
 session_start();
 $success = $_SESSION['success'] ?? null;
-$errors  = $_SESSION['errors']  ?? [];
-$old     = $_SESSION['old']     ?? [];
+$errors = $_SESSION['errors'] ?? [];
+$old = $_SESSION['old'] ?? [];
 unset($_SESSION['success'], $_SESSION['errors'], $_SESSION['old']);
 session_write_close();
 $tiposSangre = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 $generosList = ['Masculino', 'Femenino', 'Otro', 'Prefiero no decir'];
 
-$title = "Registro de Pacientes — ClinicaApp";
-$description = "Sistema de registro de pacientes con PHP + MySQL.";
+$title = 'Registro de Pacientes — ClinicaApp';
+$description = 'Sistema de registro de pacientes con PHP + MySQL.';
 $activeTab = 'registro';
-include __DIR__ . '/templates/header.php';
+include __DIR__.'/templates/header.php';
 ?>
 <main class="container">
   <div class="page-header">
     <h1>Registro de <span>Paciente</span></h1>
   </div>
-  <?php if ($success): ?>
+  <?php if ($success) { ?>
   <div class="alert alert-success" role="alert" data-autodismiss="6000" id="alert-success">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;">
       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
     </svg>
     <span><?= $success ?></span>
   </div>
-  <?php endif; ?>
-  <?php if (!empty($errors)): ?>
+  <?php } ?>
+  <?php if (! empty($errors)) { ?>
   <div class="alert alert-danger" role="alert" id="alert-errors">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;">
       <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -38,13 +38,13 @@ include __DIR__ . '/templates/header.php';
     <div>
       <strong>Corrige los siguientes errores:</strong>
       <ul>
-        <?php foreach ($errors as $err): ?>
+        <?php foreach ($errors as $err) { ?>
           <li><?= htmlspecialchars($err, ENT_QUOTES, 'UTF-8') ?></li>
-        <?php endforeach; ?>
+        <?php } ?>
       </ul>
     </div>
   </div>
-  <?php endif; ?>
+  <?php } ?>
   <div class="card">
     <div class="card-header">
       <h2>Nuevo Paciente</h2>
@@ -133,9 +133,9 @@ include __DIR__ . '/templates/header.php';
           <select id="tipo_sangre" name="tipo_sangre"
             class="form-control <?= isset($errors['tipo_sangre']) ? 'is-invalid' : '' ?>" required>
             <option value="">— Selecciona —</option>
-            <?php foreach ($tiposSangre as $ts): ?>
+            <?php foreach ($tiposSangre as $ts) { ?>
               <option value="<?= $ts ?>" <?= ($old['tipo_sangre'] ?? '') === $ts ? 'selected' : '' ?>><?= $ts ?></option>
-            <?php endforeach; ?>
+            <?php } ?>
           </select>
           <span class="invalid-feedback"><?= htmlspecialchars($errors['tipo_sangre'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
         </div>
@@ -145,12 +145,12 @@ include __DIR__ . '/templates/header.php';
           <select id="genero" name="genero"
             class="form-control <?= isset($errors['género']) ? 'is-invalid' : '' ?>" required>
             <option value="">— Selecciona —</option>
-            <?php foreach ($generosList as $g): ?>
+            <?php foreach ($generosList as $g) { ?>
               <option value="<?= htmlspecialchars($g, ENT_QUOTES, 'UTF-8') ?>"
                 <?= ($old['genero'] ?? '') === $g ? 'selected' : '' ?>>
                 <?= htmlspecialchars($g, ENT_QUOTES, 'UTF-8') ?>
               </option>
-            <?php endforeach; ?>
+            <?php } ?>
           </select>
           <span class="invalid-feedback"><?= htmlspecialchars($errors['género'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
         </div>
@@ -172,5 +172,5 @@ include __DIR__ . '/templates/header.php';
   </div>
 </main>
 <?php
-include __DIR__ . '/templates/footer.php';
+include __DIR__.'/templates/footer.php';
 ?>

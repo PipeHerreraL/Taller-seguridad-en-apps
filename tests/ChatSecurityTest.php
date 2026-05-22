@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use PDO;
-use PHPUnit\Framework\TestCase;
-use App\Models\Paciente;
 use App\Helpers\ChatContext;
 use App\Helpers\GroqClient;
+use App\Models\Paciente;
+use PDO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * ChatSecurityTest
@@ -18,7 +18,9 @@ use App\Helpers\GroqClient;
 class ChatSecurityTest extends TestCase
 {
     private PDO $db;
+
     private Paciente $pacienteModel;
+
     private GroqClient $groqClient;
 
     protected function setUp(): void
@@ -61,17 +63,17 @@ class ChatSecurityTest extends TestCase
         ");
 
         $this->pacienteModel = new Paciente($this->db);
-        
+
         // Forzar modo Mock estableciendo GROQ_API_KEY a 'mock' temporalmente
         $_ENV['GROQ_API_KEY'] = 'mock';
-        $this->groqClient = new GroqClient($this->pacienteModel, new ChatContext());
+        $this->groqClient = new GroqClient($this->pacienteModel, new ChatContext);
     }
 
     #[Test]
     public function buscar_por_nombre_excluye_password_hash(): void
     {
         $resultados = $this->pacienteModel->buscarPorNombreCompleto('Juan');
-        
+
         $this->assertNotEmpty($resultados);
         foreach ($resultados as $paciente) {
             $this->assertArrayNotHasKey('password_hash', $paciente, '¡Fuga de Seguridad! El hash de la contraseña está expuesto.');
@@ -98,7 +100,7 @@ class ChatSecurityTest extends TestCase
         $this->assertSame('Lopez Herrera', $resultados[0]['apellido']);
         $this->assertSame('3201234567', $resultados[0]['telefono']);
     }
-    
+
     #[Test]
     public function chat_mantiene_contexto_del_paciente_en_seguimiento(): void
     {
@@ -133,6 +135,7 @@ class ChatSecurityTest extends TestCase
         $this->assertStringContainsString('Lopez Herrera', $apellidos);
         $this->assertStringNotContainsString('criterio «', $apellidos);
     }
+
     #[Test]
     public function asistente_encuentra_paciente_con_frase_natural(): void
     {
@@ -164,14 +167,14 @@ class ChatSecurityTest extends TestCase
         foreach ($payloads as $payload) {
             // Intentar buscar usando el payload malicioso
             $resultados = $this->pacienteModel->buscarPorNombreCompleto($payload);
-            
+
             // Debería retornar vacío porque no existe ningún paciente con ese nombre literal
-            $this->assertEmpty($resultados, "El payload de inyección retornó registros inesperados.");
+            $this->assertEmpty($resultados, 'El payload de inyección retornó registros inesperados.');
         }
 
         // Verificar que la tabla y sus registros siguen intactos
         $total = $this->pacienteModel->contarTodos();
-        $this->assertEquals(2, $total, "La inyección alteró la cantidad de registros o borró la tabla.");
+        $this->assertEquals(2, $total, 'La inyección alteró la cantidad de registros o borró la tabla.');
     }
 
     #[Test]
@@ -189,7 +192,7 @@ class ChatSecurityTest extends TestCase
 
         foreach ($peticionesPeligrosas as $peticion) {
             $respuesta = $this->groqClient->chat($peticion);
-            
+
             $this->assertStringContainsString('solo lectura', mb_strtolower($respuesta));
             $this->assertStringContainsString('no estoy autorizado', mb_strtolower($respuesta));
         }
@@ -267,6 +270,7 @@ class ChatSecurityTest extends TestCase
         $this->assertStringContainsString('AB-', $respuesta);
         $this->assertStringNotContainsString('**1** paciente registrado con grupo', $respuesta);
     }
+
     #[Test]
     public function metricas_avanzadas_implementadas(): void
     {
@@ -308,6 +312,7 @@ class ChatSecurityTest extends TestCase
         $combinadoCero = $this->groqClient->chat('cuantos pacientes femeninos con AB- hay');
         $this->assertStringContainsString('**0**', $combinadoCero);
     }
+
     #[Test]
     public function rh_mas_comun_usa_datos_de_la_base_de_datos(): void
     {
@@ -324,6 +329,7 @@ class ChatSecurityTest extends TestCase
             $this->assertStringNotContainsString('7,7%', $respuesta);
         }
     }
+
     #[Test]
     public function asistente_responde_preguntas_de_lectura_correctamente(): void
     {

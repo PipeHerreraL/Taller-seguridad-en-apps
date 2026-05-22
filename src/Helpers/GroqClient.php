@@ -14,16 +14,20 @@ use Exception;
 class GroqClient
 {
     private string $apiKey;
+
     private string $model = 'llama-3.1-8b-instant';
+
     private string $apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+
     private Paciente $pacienteModel;
+
     private ChatContext $chatContext;
 
     public function __construct(?Paciente $pacienteModel = null, ?ChatContext $chatContext = null)
     {
         $this->apiKey = $_ENV['GROQ_API_KEY'] ?? getenv('GROQ_API_KEY') ?: 'mock';
-        $this->pacienteModel = $pacienteModel ?? new Paciente();
-        $this->chatContext = $chatContext ?? new ChatContext();
+        $this->pacienteModel = $pacienteModel ?? new Paciente;
+        $this->chatContext = $chatContext ?? new ChatContext;
     }
 
     /**
@@ -86,20 +90,22 @@ class GroqClient
                         'role' => 'tool',
                         'tool_call_id' => $toolCall['id'],
                         'name' => $toolName,
-                        'content' => json_encode($toolResult)
+                        'content' => json_encode($toolResult),
                     ];
                 }
 
                 // 2. Segundo llamado enviando los resultados de las herramientas
                 $finalResponse = $this->makeRequest($messages);
-                return $finalResponse['choices'][0]['message']['content'] ?? "No pude procesar la respuesta.";
+
+                return $finalResponse['choices'][0]['message']['content'] ?? 'No pude procesar la respuesta.';
             }
 
-            return $response['choices'][0]['message']['content'] ?? "No pude procesar la respuesta.";
+            return $response['choices'][0]['message']['content'] ?? 'No pude procesar la respuesta.';
 
         } catch (Exception $e) {
-            error_log('[GroqClient] Error: ' . $e->getMessage());
-            return "Lo siento, experimenté un error de conexión con mi cerebro artificial. Detalles: " . htmlspecialchars($e->getMessage());
+            error_log('[GroqClient] Error: '.$e->getMessage());
+
+            return 'Lo siento, experimenté un error de conexión con mi cerebro artificial. Detalles: '.htmlspecialchars($e->getMessage());
         }
     }
 
@@ -108,20 +114,20 @@ class GroqClient
      */
     private function getSystemPrompt(): string
     {
-        return "Eres ClinicaApp AI, un asistente virtual de solo lectura para la clínica ClinicaApp.\n" .
-               "FUENTE DE DATOS OBLIGATORIA:\n" .
-               "- Toda estadística o dato de pacientes proviene EXCLUSIVAMENTE de las herramientas conectadas a la base de datos local.\n" .
-               "- NUNCA uses conocimiento general, estadísticas mundiales, la OMS ni datos de población global para responder.\n" .
-               "- Si preguntan por pacientes registrados, totales, RH/tipo de sangre más común o contacto de un paciente, DEBES invocar la herramienta correspondiente antes de responder.\n" .
-               "- Si una herramienta devuelve datos, responde solo con esos datos. Si no hay datos, dilo claramente.\n" .
-               "CONTEXTO CLÍNICO:\n" .
-               "- Atiendes al personal médico autorizado de ClinicaApp. Los pacientes ya registraron sus datos en la clínica.\n" .
-               "- NUNCA niegues teléfono, correo u otros datos de contacto por privacidad o consentimiento: usa buscar_paciente_por_nombre.\n" .
-               "REGLAS DE SEGURIDAD CRÍTICAS:\n" .
-               "1. Eres de SOLO LECTURA. No tienes capacidad ni herramientas para crear, modificar, actualizar o eliminar registros. " .
-               "Rechaza peticiones de insertar, cambiar o borrar datos.\n" .
-               "2. Nunca reveles contraseñas ni password_hash.\n" .
-               "3. Respuestas concisas, profesionales y en español.";
+        return "Eres ClinicaApp AI, un asistente virtual de solo lectura para la clínica ClinicaApp.\n".
+               "FUENTE DE DATOS OBLIGATORIA:\n".
+               "- Toda estadística o dato de pacientes proviene EXCLUSIVAMENTE de las herramientas conectadas a la base de datos local.\n".
+               "- NUNCA uses conocimiento general, estadísticas mundiales, la OMS ni datos de población global para responder.\n".
+               "- Si preguntan por pacientes registrados, totales, RH/tipo de sangre más común o contacto de un paciente, DEBES invocar la herramienta correspondiente antes de responder.\n".
+               "- Si una herramienta devuelve datos, responde solo con esos datos. Si no hay datos, dilo claramente.\n".
+               "CONTEXTO CLÍNICO:\n".
+               "- Atiendes al personal médico autorizado de ClinicaApp. Los pacientes ya registraron sus datos en la clínica.\n".
+               "- NUNCA niegues teléfono, correo u otros datos de contacto por privacidad o consentimiento: usa buscar_paciente_por_nombre.\n".
+               "REGLAS DE SEGURIDAD CRÍTICAS:\n".
+               '1. Eres de SOLO LECTURA. No tienes capacidad ni herramientas para crear, modificar, actualizar o eliminar registros. '.
+               "Rechaza peticiones de insertar, cambiar o borrar datos.\n".
+               "2. Nunca reveles contraseñas ni password_hash.\n".
+               '3. Respuestas concisas, profesionales y en español.';
     }
 
     /**
@@ -137,9 +143,9 @@ class GroqClient
                     'description' => 'OBLIGATORIO para preguntas sobre cuántos pacientes hay, total registrados o cantidad en la base de datos de ClinicaApp.',
                     'parameters' => [
                         'type' => 'object',
-                        'properties' => (object)[]
-                    ]
-                ]
+                        'properties' => (object) [],
+                    ],
+                ],
             ],
             [
                 'type' => 'function',
@@ -151,12 +157,12 @@ class GroqClient
                         'properties' => [
                             'nombre' => [
                                 'type' => 'string',
-                                'description' => 'Nombre, apellido o fragmentos separados por espacio (ej. "Juan Lopez", "Felipe Herrera"). Búsqueda parcial por cada palabra.'
-                            ]
+                                'description' => 'Nombre, apellido o fragmentos separados por espacio (ej. "Juan Lopez", "Felipe Herrera"). Búsqueda parcial por cada palabra.',
+                            ],
                         ],
-                        'required' => ['nombre']
-                    ]
-                ]
+                        'required' => ['nombre'],
+                    ],
+                ],
             ],
             [
                 'type' => 'function',
@@ -165,10 +171,10 @@ class GroqClient
                     'description' => 'OBLIGATORIO para preguntas sobre RH, tipo de sangre o grupo sanguíneo más común/frecuente entre los pacientes de ClinicaApp. No uses estadísticas mundiales.',
                     'parameters' => [
                         'type' => 'object',
-                        'properties' => (object)[]
-                    ]
-                ]
-            ]
+                        'properties' => (object) [],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -187,6 +193,7 @@ class GroqClient
                     return ['error' => 'Debes proporcionar un nombre de paciente válido.'];
                 }
                 $results = $this->pacienteModel->buscarPorNombreCompleto($term);
+
                 return ['pacientes' => $results];
 
             case 'obtener_rh_mas_comun':
@@ -203,6 +210,7 @@ class GroqClient
                 }
                 arsort($counts);
                 $comun = array_key_first($counts) ?: '—';
+
                 return ['rh_comun' => $comun];
 
             default:
@@ -218,7 +226,7 @@ class GroqClient
         $payload = [
             'model' => $this->model,
             'messages' => $messages,
-            'temperature' => 0.2
+            'temperature' => 0.2,
         ];
 
         if ($tools !== null) {
@@ -228,7 +236,7 @@ class GroqClient
 
         $ch = curl_init($this->apiUrl);
         if ($ch === false) {
-            throw new Exception("No se pudo inicializar cURL.");
+            throw new Exception('No se pudo inicializar cURL.');
         }
 
         $jsonData = json_encode($payload);
@@ -238,7 +246,7 @@ class GroqClient
         curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'Authorization: Bearer ' . $this->apiKey
+            'Authorization: Bearer '.$this->apiKey,
         ]);
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
@@ -249,16 +257,16 @@ class GroqClient
         curl_close($ch);
 
         if ($err) {
-            throw new Exception("Falla de red en cURL: " . $err);
+            throw new Exception('Falla de red en cURL: '.$err);
         }
 
         if ($httpCode !== 200) {
-            throw new Exception("Error en API de Groq (HTTP {$httpCode}): " . $response);
+            throw new Exception("Error en API de Groq (HTTP {$httpCode}): ".$response);
         }
 
         $data = json_decode($response, true);
         if ($data === null) {
-            throw new Exception("Error al decodificar la respuesta JSON de Groq.");
+            throw new Exception('Error al decodificar la respuesta JSON de Groq.');
         }
 
         return $data;
@@ -282,9 +290,10 @@ class GroqClient
         if ($this->isRhCommonQuestion($normalized)) {
             $total = $this->pacienteModel->contarTodos();
             if ($total === 0) {
-                return "No hay pacientes registrados en ClinicaApp, por lo que no puedo calcular el tipo de sangre más común.";
+                return 'No hay pacientes registrados en ClinicaApp, por lo que no puedo calcular el tipo de sangre más común.';
             }
             $rh = $this->executeTool('obtener_rh_mas_comun', [])['rh_comun'] ?? '—';
+
             return "Según los **{$total}** pacientes registrados en **ClinicaApp**, el grupo sanguíneo (RH) más común es **{$rh}**.";
         }
 
@@ -298,7 +307,7 @@ class GroqClient
 
     private function tryAnswerAverageAgeQuestion(string $normalized): ?string
     {
-        if (!$this->isAverageAgeQuestion($normalized)) {
+        if (! $this->isAverageAgeQuestion($normalized)) {
             return null;
         }
 
@@ -310,7 +319,7 @@ class GroqClient
         $total = $this->pacienteModel->contarTodos();
 
         return "Según la base de datos de **ClinicaApp**, el promedio de edad entre los **{$total}** "
-            . "pacientes registrados es de **{$promedio}** años.";
+            ."pacientes registrados es de **{$promedio}** años.";
     }
 
     private function isAverageAgeQuestion(string $normalized): bool
@@ -338,19 +347,20 @@ class GroqClient
             return null;
         }
 
-        if (!$this->isPatientLookupQuestion($normalized) && !$this->isPatientFollowUp($normalized)) {
+        if (! $this->isPatientLookupQuestion($normalized) && ! $this->isPatientFollowUp($normalized)) {
             return null;
         }
 
         $searchTerm = $this->extractSearchTermsFromMessage($normalized);
 
-        if ($searchTerm !== '' && !$this->isOnlyPatientFieldTerms($searchTerm)) {
+        if ($searchTerm !== '' && ! $this->isOnlyPatientFieldTerms($searchTerm)) {
             return $this->formatPatientSearchResponse($searchTerm, $normalized);
         }
 
         $ctx = $this->chatContext->load();
         if ($ctx['last_patients'] !== []) {
             $pacientes = $this->refreshPatientsFromDatabase($ctx);
+
             return $this->formatPatientFromContext($pacientes, $normalized);
         }
 
@@ -359,7 +369,7 @@ class GroqClient
         }
 
         return 'Aún no he consultado ningún paciente en esta conversación. '
-            . 'Indica el nombre o apellido (por ejemplo: «Juan López») y vuelve a preguntar.';
+            .'Indica el nombre o apellido (por ejemplo: «Juan López») y vuelve a preguntar.';
     }
 
     private function isDestructiveRequest(string $normalized): bool
@@ -416,7 +426,7 @@ class GroqClient
 
     private function tryAnswerDistributionQuestion(string $normalized): ?string
     {
-        if (!$this->isDistributionQuestion($normalized)) {
+        if (! $this->isDistributionQuestion($normalized)) {
             return null;
         }
 
@@ -427,10 +437,10 @@ class GroqClient
         $porGenero = (bool) preg_match('/(genero|género|sexo)/u', $normalized);
         $porSangre = (bool) preg_match('/(sangre|rh|sangu[ií]neo)/u', $normalized);
 
-        if ($porGenero && !$porSangre) {
+        if ($porGenero && ! $porSangre) {
             return $this->formatDistributionResponse('género', $this->pacienteModel->obtenerDistribucionGenero());
         }
-        if ($porSangre && !$porGenero) {
+        if ($porSangre && ! $porGenero) {
             return $this->formatDistributionResponse('grupo sanguíneo (RH)', $this->pacienteModel->obtenerDistribucionTipoSangre());
         }
 
@@ -441,7 +451,7 @@ class GroqClient
     }
 
     /**
-     * @param array<string, int> $distribucion
+     * @param  array<string, int>  $distribucion
      */
     private function formatDistributionResponse(string $etiqueta, array $distribucion): string
     {
@@ -473,6 +483,7 @@ class GroqClient
 
         if ($bloodType !== null && $genero !== null && $this->isMetricCountQuestion($normalized)) {
             $count = $this->pacienteModel->contarConFiltros($genero, $bloodType);
+
             return $this->formatMetricCountResponse(
                 $count,
                 "de género **{$genero}** y grupo sanguíneo **{$bloodType}**"
@@ -483,6 +494,7 @@ class GroqClient
         if ($periodo !== null && $this->isMetricCountQuestion($normalized)) {
             $count = $this->pacienteModel->contarRegistradosDesde($periodo);
             $etiquetaPeriodo = $this->describeRegistrationPeriod($normalized);
+
             return $this->formatMetricCountResponse($count, "registrados {$etiquetaPeriodo}");
         }
 
@@ -492,6 +504,7 @@ class GroqClient
             $desc = $umbralEdad['op'] === 'gte'
                 ? "de **{$umbralEdad['age']}** años o más"
                 : "menores de **{$umbralEdad['age']}** años";
+
             return $this->formatMetricCountResponse($count, $desc);
         }
 
@@ -499,26 +512,31 @@ class GroqClient
         if ($terminoObs !== null) {
             $count = $this->pacienteModel->contarObservacionesContienen($terminoObs);
             $termSafe = htmlspecialchars($terminoObs, ENT_QUOTES, 'UTF-8');
+
             return $this->formatMetricCountResponse($count, "con «{$termSafe}» en observaciones o notas");
         }
 
         if ($bloodType !== null) {
             $count = $this->pacienteModel->contarPorTipoSangre($bloodType);
+
             return $this->formatMetricCountResponse($count, "con grupo sanguíneo **{$bloodType}**");
         }
 
         if ($genero !== null) {
             $count = $this->pacienteModel->contarPorGenero($genero);
+
             return $this->formatMetricCountResponse($count, "de género **{$genero}**");
         }
 
         if ($this->isObservationsCountQuestion($normalized)) {
             $count = $this->pacienteModel->contarConObservaciones();
+
             return $this->formatMetricCountResponse($count, 'con observaciones o notas clínicas registradas');
         }
 
         if ($this->isPatientTotalCountQuestion($normalized)) {
             $total = $this->pacienteModel->contarTodos();
+
             return $this->formatMetricCountResponse($total, 'en total');
         }
 
@@ -599,6 +617,7 @@ class GroqClient
     private function formatMetricCountResponse(int $count, string $criterio): string
     {
         $etiqueta = $count === 1 ? 'paciente registrado' : 'pacientes registrados';
+
         return "Según la base de datos de **ClinicaApp**, hay **{$count}** {$etiqueta} {$criterio}.";
     }
 
@@ -638,7 +657,7 @@ class GroqClient
         if (preg_match('/(prefiero\s+no\s+decir|no\s+binario|no\s+especifica)/u', $normalized)) {
             return 'Prefiero no decir';
         }
-        if (preg_match('/\botros?\b/u', $normalized) && !preg_match('/\b(masculin|femenin|hombre|mujer)\b/u', $normalized)) {
+        if (preg_match('/\botros?\b/u', $normalized) && ! preg_match('/\b(masculin|femenin|hombre|mujer)\b/u', $normalized)) {
             return 'Otro';
         }
 
@@ -647,15 +666,15 @@ class GroqClient
 
     private function extractBloodTypeFilter(string $normalized): ?string
     {
-        if (!preg_match('/(AB\+|AB-|O\+|O-|A\+|A-|B\+|B-)/i', $normalized, $match)) {
+        if (! preg_match('/(AB\+|AB-|O\+|O-|A\+|A-|B\+|B-)/i', $normalized, $match)) {
             return null;
         }
 
         $map = [
             'AB+' => 'AB+', 'AB-' => 'AB-',
-            'A+'  => 'A+',  'A-'  => 'A-',
-            'B+'  => 'B+',  'B-'  => 'B-',
-            'O+'  => 'O+',  'O-'  => 'O-',
+            'A+' => 'A+',  'A-' => 'A-',
+            'B+' => 'B+',  'B-' => 'B-',
+            'O+' => 'O+',  'O-' => 'O-',
         ];
 
         $key = strtoupper($match[1]);
@@ -683,7 +702,7 @@ class GroqClient
     {
         return (bool) preg_match(
             '/(telefono|teléfono|correo|email|e-mail|contacto|celular|llamar|whatsapp|genero|género|sexo|'
-            . 'paciente|buscar|busca|quien\s+es|quién\s+es|datos\s+de|informaci[oó]n\s+de)/u',
+            .'paciente|buscar|busca|quien\s+es|quién\s+es|datos\s+de|informaci[oó]n\s+de)/u',
             $normalized
         ) || $this->isRegistrationDateQuestion($normalized) || $this->isBirthDateQuestion($normalized)
             || $this->isPatientNameFieldQuestion($normalized);
@@ -701,16 +720,16 @@ class GroqClient
     {
         return (bool) preg_match(
             '/(fecha\s+de\s+nacimiento|cuando\s+naci[oó]?|dia\s+de\s+nacimiento|d[ií]a\s+que\s+naci|'
-            . 'nacimient|\bnaci[oó]\b)/u',
+            .'nacimient|\bnaci[oó]\b)/u',
             $normalized
-        ) && !$this->isRegistrationDateQuestion($normalized);
+        ) && ! $this->isRegistrationDateQuestion($normalized);
     }
 
     private function isRegistrationDateQuestion(string $normalized): bool
     {
         return (bool) preg_match(
             '/(registrad[oa]s?|inscrit[oa]s?|fecha\s+de\s+(registro|alta)|cuando\s+(fue|se\s+registr)|'
-            . 'dia\s+de\s+registro|d[ií]a\s+de\s+alta)/u',
+            .'dia\s+de\s+registro|d[ií]a\s+de\s+alta)/u',
             $normalized
         );
     }
@@ -761,7 +780,7 @@ class GroqClient
         ]);
 
         foreach ($words as $word) {
-            if (!in_array($word, $fieldWords, true)) {
+            if (! in_array($word, $fieldWords, true)) {
                 return false;
             }
         }
@@ -791,7 +810,7 @@ class GroqClient
     }
 
     /**
-     * @param array{last_search_term: string, last_patients: list<array<string, mixed>>} $ctx
+     * @param  array{last_search_term: string, last_patients: list<array<string, mixed>>}  $ctx
      * @return list<array<string, mixed>>
      */
     private function refreshPatientsFromDatabase(array $ctx): array
@@ -801,6 +820,7 @@ class GroqClient
             $pacientes = $res['pacientes'] ?? [];
             if ($pacientes !== []) {
                 $this->chatContext->rememberPatients($pacientes, $ctx['last_search_term']);
+
                 return $pacientes;
             }
         }
@@ -836,7 +856,7 @@ class GroqClient
         $cleanWords = [];
 
         foreach ($words as $word) {
-            if (mb_strlen($word) >= 2 && !in_array($word, $stopWords, true)) {
+            if (mb_strlen($word) >= 2 && ! in_array($word, $stopWords, true)) {
                 $cleanWords[] = $word;
             }
         }
@@ -851,7 +871,7 @@ class GroqClient
 
         if ($pacientes === []) {
             return 'No encontré ningún paciente registrado en **ClinicaApp** con el criterio «'
-                . htmlspecialchars($searchTerm, ENT_QUOTES, 'UTF-8') . '».';
+                .htmlspecialchars($searchTerm, ENT_QUOTES, 'UTF-8').'».';
         }
 
         $this->chatContext->rememberPatients($pacientes, $searchTerm);
@@ -860,20 +880,20 @@ class GroqClient
     }
 
     /**
-     * @param list<array<string, mixed>> $pacientes
+     * @param  list<array<string, mixed>>  $pacientes
      */
     private function formatPatientFromContext(array $pacientes, string $normalized): string
     {
-        $wantsPhone        = (bool) preg_match('/(telefono|teléfono|celular|llamar|whatsapp)/u', $normalized);
-        $wantsEmail        = (bool) preg_match('/(correo|email|e-mail)/u', $normalized);
-        $wantsGender       = (bool) preg_match('/(genero|género|sexo)/u', $normalized);
-        $wantsRh           = (bool) preg_match('/\b(rh|tipo[s]?\s+de\s+sangre|grupo[s]?\s+sangu[ií]neo)\b/u', $normalized);
+        $wantsPhone = (bool) preg_match('/(telefono|teléfono|celular|llamar|whatsapp)/u', $normalized);
+        $wantsEmail = (bool) preg_match('/(correo|email|e-mail)/u', $normalized);
+        $wantsGender = (bool) preg_match('/(genero|género|sexo)/u', $normalized);
+        $wantsRh = (bool) preg_match('/\b(rh|tipo[s]?\s+de\s+sangre|grupo[s]?\s+sangu[ií]neo)\b/u', $normalized);
         $wantsRegisteredAt = $this->isRegistrationDateQuestion($normalized);
-        $wantsBirthDate    = $this->isBirthDateQuestion($normalized);
-        $wantsApellido     = (bool) preg_match('/apellido/u', $normalized);
-        $wantsNombre       = (bool) preg_match('/\bnombre/u', $normalized) && !$wantsApellido;
-        $wantsFullName     = (bool) preg_match('/(nombre\s+completo|como\s+se\s+llama)/u', $normalized);
-        $focused           = $wantsPhone || $wantsEmail || $wantsGender || $wantsRh || $wantsRegisteredAt
+        $wantsBirthDate = $this->isBirthDateQuestion($normalized);
+        $wantsApellido = (bool) preg_match('/apellido/u', $normalized);
+        $wantsNombre = (bool) preg_match('/\bnombre/u', $normalized) && ! $wantsApellido;
+        $wantsFullName = (bool) preg_match('/(nombre\s+completo|como\s+se\s+llama)/u', $normalized);
+        $focused = $wantsPhone || $wantsEmail || $wantsGender || $wantsRh || $wantsRegisteredAt
             || $wantsBirthDate || $wantsApellido || $wantsNombre || $wantsFullName;
 
         $response = $focused
@@ -883,47 +903,55 @@ class GroqClient
         foreach ($pacientes as $p) {
             $nombre = htmlspecialchars((string) ($p['nombre'] ?? ''), ENT_QUOTES, 'UTF-8');
             $apellido = htmlspecialchars((string) ($p['apellido'] ?? ''), ENT_QUOTES, 'UTF-8');
-            $nombreCompleto = htmlspecialchars(trim($p['nombre'] . ' ' . $p['apellido']), ENT_QUOTES, 'UTF-8');
+            $nombreCompleto = htmlspecialchars(trim($p['nombre'].' '.$p['apellido']), ENT_QUOTES, 'UTF-8');
             $telefono = htmlspecialchars((string) ($p['telefono'] ?? ''), ENT_QUOTES, 'UTF-8');
             $email = htmlspecialchars((string) ($p['email'] ?? ''), ENT_QUOTES, 'UTF-8');
             $rh = htmlspecialchars((string) ($p['tipo_sangre'] ?? ''), ENT_QUOTES, 'UTF-8');
             $genero = htmlspecialchars((string) ($p['genero'] ?? ''), ENT_QUOTES, 'UTF-8');
-            $otherFields = !$wantsPhone && !$wantsEmail && !$wantsGender && !$wantsRh && !$wantsRegisteredAt
-                && !$wantsBirthDate && !$wantsApellido && !$wantsNombre && !$wantsFullName;
+            $otherFields = ! $wantsPhone && ! $wantsEmail && ! $wantsGender && ! $wantsRh && ! $wantsRegisteredAt
+                && ! $wantsBirthDate && ! $wantsApellido && ! $wantsNombre && ! $wantsFullName;
 
             if ($focused && $wantsApellido && $otherFields) {
                 $response .= "👤 **{$nombreCompleto}** — Apellido(s): `{$apellido}`\n\n";
+
                 continue;
             }
             if ($focused && ($wantsNombre || $wantsFullName) && $otherFields) {
                 $response .= "👤 Nombre: `{$nombre}` — Apellido(s): `{$apellido}`\n\n";
+
                 continue;
             }
 
             if ($focused && $wantsPhone && $otherFields) {
                 $response .= "👤 **{$nombreCompleto}** — 📞 Teléfono: `{$telefono}`\n\n";
+
                 continue;
             }
             if ($focused && $wantsEmail && $otherFields) {
                 $response .= "👤 **{$nombreCompleto}** — ✉ Correo: `{$email}`\n\n";
+
                 continue;
             }
             if ($focused && $wantsGender && $otherFields) {
                 $response .= "👤 **{$nombreCompleto}** — 🧬 Género: `{$genero}`\n\n";
+
                 continue;
             }
             if ($focused && $wantsRh && $otherFields) {
                 $response .= "👤 **{$nombreCompleto}** — 🩸 Grupo RH: `{$rh}`\n\n";
+
                 continue;
             }
             if ($focused && $wantsRegisteredAt && $otherFields) {
                 $fechaRegistro = $this->formatDateField((string) ($p['created_at'] ?? ''));
                 $response .= "👤 **{$nombreCompleto}** — 📆 Registrado el: `{$fechaRegistro}`\n\n";
+
                 continue;
             }
             if ($focused && $wantsBirthDate && $otherFields) {
                 $fechaNacimiento = $this->formatDateField((string) ($p['fecha_nacimiento'] ?? ''));
                 $response .= "👤 **{$nombreCompleto}** — 🎂 Nacido el: `{$fechaNacimiento}`\n\n";
+
                 continue;
             }
 
@@ -952,6 +980,6 @@ class GroqClient
         }
 
         return 'Hola, soy el asistente virtual de ClinicaApp. Puedo informar totales, promedios, distribuciones, '
-            . 'conteos por género/RH, registros de hoy o este mes, edad mínima y datos de contacto por nombre.';
+            .'conteos por género/RH, registros de hoy o este mes, edad mínima y datos de contacto por nombre.';
     }
 }

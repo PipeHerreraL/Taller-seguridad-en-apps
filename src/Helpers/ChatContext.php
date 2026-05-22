@@ -11,6 +11,7 @@ namespace App\Helpers;
 class ChatContext
 {
     private const SESSION_KEY = 'clinica_chat';
+
     private const MAX_HISTORY = 20;
 
     /**
@@ -19,15 +20,16 @@ class ChatContext
     public function load(): array
     {
         $ctx = $_SESSION[self::SESSION_KEY] ?? [];
+
         return [
             'last_search_term' => (string) ($ctx['last_search_term'] ?? ''),
-            'last_patients'      => is_array($ctx['last_patients'] ?? null) ? $ctx['last_patients'] : [],
-            'messages'           => is_array($ctx['messages'] ?? null) ? $ctx['messages'] : [],
+            'last_patients' => is_array($ctx['last_patients'] ?? null) ? $ctx['last_patients'] : [],
+            'messages' => is_array($ctx['messages'] ?? null) ? $ctx['messages'] : [],
         ];
     }
 
     /**
-     * @param list<array<string, mixed>> $patients
+     * @param  list<array<string, mixed>>  $patients
      */
     public function rememberPatients(array $patients, string $searchTerm): void
     {

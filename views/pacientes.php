@@ -3,20 +3,21 @@ declare(strict_types=1);
 /**
  * public/views/pacientes.php — Vista: Listado y gestión de pacientes registrados.
  */
-require_once __DIR__ . '/../autoload.php';
+require_once __DIR__.'/../autoload.php';
 use App\Models\Paciente;
+
 session_start();
 $success = $_SESSION['success'] ?? null;
-$errors  = $_SESSION['errors']  ?? [];
+$errors = $_SESSION['errors'] ?? [];
 unset($_SESSION['success'], $_SESSION['errors']);
 session_write_close();
-$pacientes     = [];
-$dbError       = null;
+$pacientes = [];
+$dbError = null;
 try {
-    $pacienteModel = new Paciente();
-    $pacientes     = $pacienteModel->obtenerTodos();
-} catch (\PDOException $e) {
-    error_log('[pacientes.php] ' . $e->getMessage());
+    $pacienteModel = new Paciente;
+    $pacientes = $pacienteModel->obtenerTodos();
+} catch (PDOException $e) {
+    error_log('[pacientes.php] '.$e->getMessage());
     $dbError = 'No se pudo conectar a la base de datos. Verifica que XAMPP esté activo.';
 }
 $total = count($pacientes);
@@ -28,10 +29,10 @@ foreach ($pacientes as $p) {
 }
 arsort($tiposCount);
 $tipoComun = array_key_first($tiposCount) ?? '—';
-$title = "Pacientes Registrados — ClinicaApp";
-$description = "Lista completa de pacientes registrados en ClinicaApp.";
+$title = 'Pacientes Registrados — ClinicaApp';
+$description = 'Lista completa de pacientes registrados en ClinicaApp.';
 $activeTab = 'pacientes';
-include __DIR__ . '/templates/header.php';
+include __DIR__.'/templates/header.php';
 ?>
 <main class="container container-wide">
   <div class="page-header">
@@ -80,33 +81,33 @@ include __DIR__ . '/templates/header.php';
     </div>
   </div>
   <!-- Flash messages -->
-  <?php if ($success): ?>
+  <?php if ($success) { ?>
   <div class="alert alert-success" role="alert" data-autodismiss="5000" id="alert-success">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;">
       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
     </svg>
     <span><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></span>
   </div>
-  <?php endif; ?>
-  <?php if (!empty($errors)): ?>
+  <?php } ?>
+  <?php if (! empty($errors)) { ?>
   <div class="alert alert-danger" role="alert" id="alert-errors">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;">
       <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
     </svg>
-    <div><?php foreach ($errors as $e): ?><div><?= htmlspecialchars($e, ENT_QUOTES, 'UTF-8') ?></div><?php endforeach; ?></div>
+    <div><?php foreach ($errors as $e) { ?><div><?= htmlspecialchars($e, ENT_QUOTES, 'UTF-8') ?></div><?php } ?></div>
   </div>
-  <?php endif; ?>
-  <?php if ($dbError): ?>
+  <?php } ?>
+  <?php if ($dbError) { ?>
   <div class="alert alert-danger" role="alert" id="alert-db">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;">
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
     </svg>
     <span><?= htmlspecialchars($dbError, ENT_QUOTES, 'UTF-8') ?></span>
   </div>
-  <?php endif; ?>
+  <?php } ?>
   <!-- Tabla -->
   <div class="card" style="padding:0">
-    <?php if (empty($pacientes) && !$dbError): ?>
+    <?php if (empty($pacientes) && ! $dbError) { ?>
     <div class="empty-state">
       <div class="empty-icon">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 48px; height: 48px; margin: 0 auto; opacity: 0.5;">
@@ -116,7 +117,7 @@ include __DIR__ . '/templates/header.php';
       <p style="margin-top: 1rem;">No hay pacientes registrados todavía.</p>
       <a href="index" class="btn btn-accent" style="margin-top:1rem" id="btn-primero">Registrar primer paciente</a>
     </div>
-    <?php else: ?>
+    <?php } else { ?>
     <div class="table-wrapper">
       <table>
         <thead>
@@ -167,51 +168,51 @@ include __DIR__ . '/templates/header.php';
           </tr>
         </thead>
         <tbody>
-          <?php foreach ($pacientes as $p): ?>
+          <?php foreach ($pacientes as $p) { ?>
           <tr>
-            <td class="copyable" data-copy="<?= htmlspecialchars($p['nombre'] . ' ' . $p['apellido'], ENT_QUOTES, 'UTF-8') ?>" data-sort-value="<?= htmlspecialchars($p['nombre'] . ' ' . $p['apellido'], ENT_QUOTES, 'UTF-8') ?>" title="Clic para copiar">
-              <strong><?= htmlspecialchars($p['nombre'] . ' ' . $p['apellido'], ENT_QUOTES, 'UTF-8') ?></strong>
+            <td class="copyable" data-copy="<?= htmlspecialchars($p['nombre'].' '.$p['apellido'], ENT_QUOTES, 'UTF-8') ?>" data-sort-value="<?= htmlspecialchars($p['nombre'].' '.$p['apellido'], ENT_QUOTES, 'UTF-8') ?>" title="Clic para copiar">
+              <strong><?= htmlspecialchars($p['nombre'].' '.$p['apellido'], ENT_QUOTES, 'UTF-8') ?></strong>
             </td>
             <td class="copyable cell-email" data-copy="<?= htmlspecialchars($p['email'], ENT_QUOTES, 'UTF-8') ?>" title="Clic para copiar">
-              <?= htmlspecialchars($p['email'],           ENT_QUOTES, 'UTF-8') ?>
+              <?= htmlspecialchars($p['email'], ENT_QUOTES, 'UTF-8') ?>
             </td>
             <td class="copyable" data-copy="<?= htmlspecialchars($p['telefono'], ENT_QUOTES, 'UTF-8') ?>" title="Clic para copiar">
-              <?= htmlspecialchars($p['telefono'],        ENT_QUOTES, 'UTF-8') ?>
+              <?= htmlspecialchars($p['telefono'], ENT_QUOTES, 'UTF-8') ?>
             </td>
             <td class="text-center" data-sort-value="<?= htmlspecialchars($p['fecha_nacimiento']) ?>"><?= date('d/m/Y', strtotime($p['fecha_nacimiento'])) ?></td>
             <td class="text-center" data-sort-value="<?= htmlspecialchars($p['tipo_sangre'], ENT_QUOTES, 'UTF-8') ?>"><span class="badge badge-blood"><?= htmlspecialchars($p['tipo_sangre'], ENT_QUOTES, 'UTF-8') ?></span></td>
             <td class="text-center" data-sort-value="<?= htmlspecialchars($p['genero'], ENT_QUOTES, 'UTF-8') ?>">
               <?php
                 $genderLabel = htmlspecialchars($p['genero'], ENT_QUOTES, 'UTF-8');
-                switch ($p['genero']) {
-                    case 'Masculino':
-                        echo '<span class="badge-gender badge-gender-masculino" title="Masculino">
+              switch ($p['genero']) {
+                  case 'Masculino':
+                      echo '<span class="badge-gender badge-gender-masculino" title="Masculino">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width: 13px; height: 13px; display: inline-block; vertical-align: middle; margin-right: 2px;">
                             <circle cx="10" cy="14" r="4" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l5-5m0 0h-4m4 0v4" />
                           </svg>Masculino
                         </span>';
-                        break;
-                    case 'Femenino':
-                        echo '<span class="badge-gender badge-gender-femenino" title="Femenino">
+                      break;
+                  case 'Femenino':
+                      echo '<span class="badge-gender badge-gender-femenino" title="Femenino">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width: 13px; height: 13px; display: inline-block; vertical-align: middle; margin-right: 2px;">
                             <circle cx="12" cy="9" r="4" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 13v6m-2.5-3h5" />
                           </svg>Femenino
                         </span>';
-                        break;
-                    case 'Otro':
-                        echo '<span class="badge-gender badge-gender-otro" title="Otro">
+                      break;
+                  case 'Otro':
+                      echo '<span class="badge-gender badge-gender-otro" title="Otro">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width: 13px; height: 13px; display: inline-block; vertical-align: middle; margin-right: 2px;">
                             <circle cx="12" cy="12" r="3.5" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 15.5v4.5m-2-2h4M14.5 9.5l4-4m0 0h-3m3 0v3M9.5 9.5l-4-4m0 0h3m-3 0v3" />
                           </svg>Otro
                         </span>';
-                        break;
-                    default:
-                        echo '<span class="badge-gender badge-gender-none" title="Prefiero no decir">-</span>';
-                        break;
-                }
+                      break;
+                  default:
+                      echo '<span class="badge-gender badge-gender-none" title="Prefiero no decir">-</span>';
+                      break;
+              }
               ?>
             </td>
             <td class="text-center" data-sort-value="<?= htmlspecialchars($p['created_at']) ?>" style="color:var(--text-muted);"><?= date('d/m/Y', strtotime($p['created_at'])) ?></td>
@@ -224,7 +225,7 @@ include __DIR__ . '/templates/header.php';
                 </button>
                 <div class="dropdown-menu">
                   <form action="delete" method="POST" style="display:block"
-                        onsubmit="return confirm('¿Eliminar a <?= htmlspecialchars(addslashes($p['nombre'] . ' ' . $p['apellido']), ENT_QUOTES, 'UTF-8') ?>?')">
+                        onsubmit="return confirm('¿Eliminar a <?= htmlspecialchars(addslashes($p['nombre'].' '.$p['apellido']), ENT_QUOTES, 'UTF-8') ?>?')">
                     <input type="hidden" name="id" value="<?= (int) $p['id'] ?>">
                     <button type="submit" class="dropdown-item text-danger" id="btn-eliminar-<?= (int) $p['id'] ?>" title="Eliminar paciente" aria-label="Eliminar paciente">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width: 15px; height: 15px; display: inline-block; vertical-align: middle;">
@@ -237,13 +238,13 @@ include __DIR__ . '/templates/header.php';
               </div>
             </td>
           </tr>
-          <?php endforeach; ?>
+          <?php } ?>
         </tbody>
       </table>
     </div>
-    <?php endif; ?>
+    <?php } ?>
   </div>
 </main>
 <?php
-include __DIR__ . '/templates/footer.php';
+include __DIR__.'/templates/footer.php';
 ?>

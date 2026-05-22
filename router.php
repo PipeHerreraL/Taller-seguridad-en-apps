@@ -1,53 +1,55 @@
 <?php
-declare(strict_types=1);
 
-require_once __DIR__ . '/autoload.php';
+declare(strict_types=1);
+use App\Helpers\Logger;
+
+require_once __DIR__.'/autoload.php';
 
 // Registrar el logger para capturar cada petición al finalizar (evita duplicidad y previene log injection)
-register_shutdown_function([\App\Helpers\Logger::class, 'logRequest']);
+register_shutdown_function([Logger::class, 'logRequest']);
 
 $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-$publicDir = __DIR__ . '/public';
-$staticFile = $publicDir . $uri;
+$publicDir = __DIR__.'/public';
+$staticFile = $publicDir.$uri;
 
 // 1. Serve existing static files (css, js, images, fonts, etc.) from public/
-if ($uri !== '/' && $uri !== '/index.php' && file_exists($staticFile) && !is_dir($staticFile)) {
+if ($uri !== '/' && $uri !== '/index.php' && file_exists($staticFile) && ! is_dir($staticFile)) {
     $ext = pathinfo($staticFile, PATHINFO_EXTENSION);
-    
+
     // Security check: Never serve raw PHP files statically (prevents source code disclosure)
     if ($ext === 'php') {
         http_response_code(403);
-        include_once __DIR__ . '/views/403.php';
+        include_once __DIR__.'/views/403.php';
         exit;
     }
 
     $mimeTypes = [
-        'css'   => 'text/css',
-        'js'    => 'application/javascript',
-        'png'   => 'image/png',
-        'jpg'   => 'image/jpeg',
-        'jpeg'  => 'image/jpeg',
-        'gif'   => 'image/gif',
-        'svg'   => 'image/svg+xml',
-        'ico'   => 'image/x-icon',
-        'json'  => 'application/json',
-        'pdf'   => 'application/pdf',
-        'woff'  => 'font/woff',
+        'css' => 'text/css',
+        'js' => 'application/javascript',
+        'png' => 'image/png',
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'gif' => 'image/gif',
+        'svg' => 'image/svg+xml',
+        'ico' => 'image/x-icon',
+        'json' => 'application/json',
+        'pdf' => 'application/pdf',
+        'woff' => 'font/woff',
         'woff2' => 'font/woff2',
-        'ttf'   => 'font/ttf',
-        'otf'   => 'font/otf',
+        'ttf' => 'font/ttf',
+        'otf' => 'font/otf',
     ];
     $contentType = $mimeTypes[$ext] ?? 'application/octet-stream';
-    
+
     // Get file metadata for cache validation (ETag / Last-Modified)
     $mtime = filemtime($staticFile);
-    $etag = md5($staticFile . $mtime);
-    
+    $etag = md5($staticFile.$mtime);
+
     header("Content-Type: $contentType");
-    header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $mtime) . ' GMT');
+    header('Last-Modified: '.gmdate('D, d M Y H:i:s', $mtime).' GMT');
     header("ETag: \"$etag\"");
     header('Cache-Control: no-cache, must-revalidate');
-    
+
     if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === "\"$etag\"") {
         http_response_code(304);
         exit;
@@ -56,11 +58,11 @@ if ($uri !== '/' && $uri !== '/index.php' && file_exists($staticFile) && !is_dir
         http_response_code(304);
         exit;
     }
-    
+
     readfile($staticFile);
     exit;
 }
 
 // 2. All other requests go to the Front Controller public/index.php
-include_once $publicDir . '/index.php';
+include_once $publicDir.'/index.php';
 exit;

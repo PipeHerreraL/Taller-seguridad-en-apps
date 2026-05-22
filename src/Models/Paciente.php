@@ -38,16 +38,17 @@ class Paciente
                     (:nombre, :apellido, :email, :password_hash, :fecha_nacimiento, :telefono, :tipo_sangre, :genero, :observaciones)';
 
         $stmt = $this->db->prepare($sql);
+
         return $stmt->execute([
-            ':nombre'           => $data['nombre'],
-            ':apellido'         => $data['apellido'],
-            ':email'            => $data['email'],
-            ':password_hash'    => $data['password_hash'],
+            ':nombre' => $data['nombre'],
+            ':apellido' => $data['apellido'],
+            ':email' => $data['email'],
+            ':password_hash' => $data['password_hash'],
             ':fecha_nacimiento' => $data['fecha_nacimiento'],
-            ':telefono'         => $data['telefono'],
-            ':tipo_sangre'      => $data['tipo_sangre'],
-            ':genero'           => $data['genero'],
-            ':observaciones'    => $data['observaciones'] ?? null,
+            ':telefono' => $data['telefono'],
+            ':tipo_sangre' => $data['tipo_sangre'],
+            ':genero' => $data['genero'],
+            ':observaciones' => $data['observaciones'] ?? null,
         ]);
     }
 
@@ -58,6 +59,7 @@ class Paciente
     {
         $sql = 'SELECT * FROM pacientes ORDER BY created_at DESC';
         $stmt = $this->db->query($sql);
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -69,6 +71,7 @@ class Paciente
         $sql = 'SELECT * FROM pacientes WHERE email = :email';
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':email' => $email]);
+
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
@@ -79,6 +82,7 @@ class Paciente
     {
         $sql = 'DELETE FROM pacientes WHERE id = :id';
         $stmt = $this->db->prepare($sql);
+
         return $stmt->execute([':id' => $id]);
     }
 
@@ -89,7 +93,8 @@ class Paciente
     {
         $sql = 'SELECT COUNT(*) FROM pacientes';
         $stmt = $this->db->query($sql);
-        return (int)$stmt->fetchColumn();
+
+        return (int) $stmt->fetchColumn();
     }
 
     /**
@@ -97,7 +102,7 @@ class Paciente
      */
     public function contarPorTipoSangre(string $tipoSangre): int
     {
-        if (!in_array($tipoSangre, self::TIPOS_SANGRE, true)) {
+        if (! in_array($tipoSangre, self::TIPOS_SANGRE, true)) {
             return 0;
         }
 
@@ -113,7 +118,7 @@ class Paciente
      */
     public function contarPorGenero(string $genero): int
     {
-        if (!in_array($genero, self::GENEROS, true)) {
+        if (! in_array($genero, self::GENEROS, true)) {
             return 0;
         }
 
@@ -142,7 +147,7 @@ class Paciente
     {
         $sql = 'SELECT fecha_nacimiento FROM pacientes';
         $stmt = $this->db->query($sql);
-        $fechas = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        $fechas = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
         if ($fechas === []) {
             return null;
@@ -217,10 +222,10 @@ class Paciente
      */
     public function contarConFiltros(?string $genero = null, ?string $tipoSangre = null): int
     {
-        if ($genero !== null && !in_array($genero, self::GENEROS, true)) {
+        if ($genero !== null && ! in_array($genero, self::GENEROS, true)) {
             $genero = null;
         }
-        if ($tipoSangre !== null && !in_array($tipoSangre, self::TIPOS_SANGRE, true)) {
+        if ($tipoSangre !== null && ! in_array($tipoSangre, self::TIPOS_SANGRE, true)) {
             $tipoSangre = null;
         }
 
@@ -254,7 +259,7 @@ class Paciente
 
         $sql = 'SELECT COUNT(*) FROM pacientes WHERE observaciones LIKE :term';
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([':term' => '%' . $this->escaparLike($termino) . '%']);
+        $stmt->execute([':term' => '%'.$this->escaparLike($termino).'%']);
 
         return (int) $stmt->fetchColumn();
     }
@@ -314,7 +319,7 @@ class Paciente
         $params = [];
 
         foreach ($palabras as $i => $palabra) {
-            $like = '%' . $this->escaparLike($palabra) . '%';
+            $like = '%'.$this->escaparLike($palabra).'%';
             $sql .= " AND (nombre LIKE :n{$i} OR apellido LIKE :a{$i} OR CONCAT(nombre, ' ', apellido) LIKE :f{$i})";
             $params[":n{$i}"] = $like;
             $params[":a{$i}"] = $like;
@@ -323,13 +328,14 @@ class Paciente
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
      * Elimina palabras vacías, muy cortas o de relleno comunes en preguntas al chat.
      *
-     * @param list<string> $palabras
+     * @param  list<string>  $palabras
      * @return list<string>
      */
     private function filtrarPalabrasBusqueda(array $palabras): array
@@ -346,7 +352,7 @@ class Paciente
         $filtradas = [];
         foreach (array_slice($palabras, 0, 10) as $palabra) {
             $normalizada = mb_strtolower($palabra);
-            if (mb_strlen($normalizada) >= 2 && !in_array($normalizada, $stopWords, true)) {
+            if (mb_strlen($normalizada) >= 2 && ! in_array($normalizada, $stopWords, true)) {
                 $filtradas[] = $palabra;
             }
         }

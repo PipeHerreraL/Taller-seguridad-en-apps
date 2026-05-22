@@ -21,7 +21,7 @@ class Validator
     public function required(string $value, string $field): void
     {
         if (trim($value) === '') {
-            $this->errors[$field] = "El campo " . ucfirst($field) . " es obligatorio.";
+            $this->errors[$field] = 'El campo '.ucfirst($field).' es obligatorio.';
         }
     }
 
@@ -33,8 +33,8 @@ class Validator
         if (trim($email) === '') {
             return;
         }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->errors[$field] = "El formato de correo electrónico no es válido.";
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->errors[$field] = 'El formato de correo electrónico no es válido.';
         }
     }
 
@@ -47,7 +47,7 @@ class Validator
             return;
         }
         if (mb_strlen($value) < $min) {
-            $this->errors[$field] = "El campo " . ucfirst($field) . " debe tener al menos {$min} caracteres.";
+            $this->errors[$field] = 'El campo '.ucfirst($field)." debe tener al menos {$min} caracteres.";
         }
     }
 
@@ -59,8 +59,8 @@ class Validator
         if (trim($value) === '') {
             return;
         }
-        if (!is_numeric($value)) {
-            $this->errors[$field] = "El campo " . ucfirst($field) . " debe ser un número.";
+        if (! is_numeric($value)) {
+            $this->errors[$field] = 'El campo '.ucfirst($field).' debe ser un número.';
         }
     }
 
@@ -72,16 +72,17 @@ class Validator
         if (trim($value) === '') {
             return;
         }
-        
+
         $d = DateTime::createFromFormat('Y-m-d', $value);
-        if (!$d || $d->format('Y-m-d') !== $value) {
-            $this->errors[$field] = "El formato de fecha no es válido.";
+        if (! $d || $d->format('Y-m-d') !== $value) {
+            $this->errors[$field] = 'El formato de fecha no es válido.';
+
             return;
         }
 
-        $now = new DateTime();
+        $now = new DateTime;
         if ($d > $now) {
-            $this->errors[$field] = "La fecha de nacimiento no puede ser futura.";
+            $this->errors[$field] = 'La fecha de nacimiento no puede ser futura.';
         }
     }
 
@@ -93,8 +94,8 @@ class Validator
         if (trim($value) === '') {
             return;
         }
-        if (!preg_match('/^\+?[0-9]{7,15}$/', $value)) {
-            $this->errors[$field] = "El formato de teléfono no es válido.";
+        if (! preg_match('/^\+?[0-9]{7,15}$/', $value)) {
+            $this->errors[$field] = 'El formato de teléfono no es válido.';
         }
     }
 
@@ -107,7 +108,7 @@ class Validator
             return;
         }
         if (preg_match('/[<>\'"]/', $value)) {
-            $this->errors[$field] = "El campo " . ucfirst($field) . " no puede contener caracteres especiales.";
+            $this->errors[$field] = 'El campo '.ucfirst($field).' no puede contener caracteres especiales.';
         }
     }
 
@@ -116,7 +117,7 @@ class Validator
      */
     public function hasErrors(): bool
     {
-        return !empty($this->errors);
+        return ! empty($this->errors);
     }
 
     /**
@@ -127,8 +128,8 @@ class Validator
         if (trim($value) === '') {
             return;
         }
-        if (!in_array($value, $list, true)) {
-            $this->errors[$field] = "El valor seleccionado para " . $field . " no es válido.";
+        if (! in_array($value, $list, true)) {
+            $this->errors[$field] = 'El valor seleccionado para '.$field.' no es válido.';
         }
     }
 

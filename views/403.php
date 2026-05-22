@@ -3,12 +3,12 @@ declare(strict_types=1);
 /**
  * views/403.php — Vista: Página de error 403 (Acceso Prohibido).
  */
-require_once __DIR__ . '/../autoload.php';
+require_once __DIR__.'/../autoload.php';
 
-$title = "Acceso Prohibido — ClinicaApp";
-$description = "No tienes permisos para acceder a este recurso.";
+$title = 'Acceso Prohibido — ClinicaApp';
+$description = 'No tienes permisos para acceder a este recurso.';
 $activeTab = '';
-include __DIR__ . '/templates/header.php';
+include __DIR__.'/templates/header.php';
 ?>
 <main class="container">
   <div class="error-container">
@@ -29,5 +29,5 @@ include __DIR__ . '/templates/header.php';
 </main>
 
 <?php
-include __DIR__ . '/templates/footer.php';
+include __DIR__.'/templates/footer.php';
 ?>

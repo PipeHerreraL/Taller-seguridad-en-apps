@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use App\Models\Paciente;
 use PDO;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use App\Models\Paciente;
 
 /**
  * SqlInjectionTest
@@ -18,13 +18,14 @@ use App\Models\Paciente;
 class SqlInjectionTest extends TestCase
 {
     private PDO $db;
+
     private Paciente $paciente;
-    
+
     protected function setUp(): void
     {
         $this->db = new PDO('sqlite::memory:');
-        $this->db->setAttribute(PDO::ATTR_ERRMODE,            PDO::ERRMODE_EXCEPTION);
-        $this->db->setAttribute(PDO::ATTR_EMULATE_PREPARES,   false);
+        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
         $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         $this->db->exec('
             CREATE TABLE pacientes (
@@ -49,38 +50,40 @@ class SqlInjectionTest extends TestCase
         ");
         $this->paciente = new Paciente($this->db);
     }
+
     public static function payloadProvider(): array
     {
         return [
-            'or_tautology'      => ["' OR 1=1 --"],
-            'drop_table'        => ["' ; DROP TABLE pacientes; --"],
-            'stacked_select'    => ["' ; SELECT * FROM pacientes; --"],
-            'union_select'      => ["' UNION SELECT 1,2,3,4,5,6,7,8,9,10 --"],
-            'comment_bypass'    => ["'/**/OR/**/1=1"],
+            'or_tautology' => ["' OR 1=1 --"],
+            'drop_table' => ["' ; DROP TABLE pacientes; --"],
+            'stacked_select' => ["' ; SELECT * FROM pacientes; --"],
+            'union_select' => ["' UNION SELECT 1,2,3,4,5,6,7,8,9,10 --"],
+            'comment_bypass' => ["'/**/OR/**/1=1"],
             'or_one_equals_one' => ["' OR '1'='1"],
-            'paren_bypass'      => ["') OR ('1'='1"],
-            'sleep_attack'      => ["' AND (SELECT 1 FROM (SELECT(SLEEP(5)))x) --"],
-            'empty_string_eq'   => ["admin@test.com' OR '"],
+            'paren_bypass' => ["') OR ('1'='1"],
+            'sleep_attack' => ["' AND (SELECT 1 FROM (SELECT(SLEEP(5)))x) --"],
+            'empty_string_eq' => ["admin@test.com' OR '"],
         ];
     }
+
     // ── INSERT con payload ────────────────────────────────────
     #[Test]
     #[DataProvider('payloadProvider')]
     public function insert_con_payload_es_tratado_como_dato(string $payload): void
     {
         // El email debe ser único, por lo que usamos md5 del payload para evitar colisiones
-        $uniqueEmail = md5($payload) . '@test.com';
-        
+        $uniqueEmail = md5($payload).'@test.com';
+
         $data = [
-            'nombre'           => $payload, // El payload va en el nombre
-            'apellido'         => 'Usuario',
-            'email'            => $uniqueEmail,
-            'password_hash'    => 'hash',
+            'nombre' => $payload, // El payload va en el nombre
+            'apellido' => 'Usuario',
+            'email' => $uniqueEmail,
+            'password_hash' => 'hash',
             'fecha_nacimiento' => '1990-01-01',
-            'telefono'         => '3000000000',
-            'tipo_sangre'      => 'O+',
-            'genero'           => 'Masculino',
-            'observaciones'    => 'Ninguna'
+            'telefono' => '3000000000',
+            'tipo_sangre' => 'O+',
+            'genero' => 'Masculino',
+            'observaciones' => 'Ninguna',
         ];
         $result = $this->paciente->crear($data);
         $this->assertTrue($result);
@@ -89,6 +92,7 @@ class SqlInjectionTest extends TestCase
         $this->assertNotFalse($record);
         $this->assertEquals($payload, $record['nombre']);
     }
+
     // ── SELECT con payload ────────────────────────────────────
     #[Test]
     #[DataProvider('payloadProvider')]
@@ -100,6 +104,7 @@ class SqlInjectionTest extends TestCase
         $result = $this->paciente->buscarPorEmail($payload);
         $this->assertFalse($result);
     }
+
     // ── DELETE / Otros ────────────────────────────────────────
     #[Test]
     public function filter_input_rechaza_id_malicioso(): void
@@ -109,35 +114,38 @@ class SqlInjectionTest extends TestCase
         $filtered = filter_var($idMalicioso, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         $this->assertFalse($filtered);
     }
+
     #[Test]
     public function delete_con_id_entero_valido_funciona_correctamente(): void
     {
         // Obtenemos los pacientes para saber el ID del admin (que es 1)
         $result = $this->paciente->eliminar(1);
         $this->assertTrue($result);
-        
+
         $this->assertEquals(0, $this->paciente->contarTodos());
     }
+
     #[Test]
     public function delete_con_id_cero_no_borra_nada(): void
     {
         $this->assertEquals(1, $this->paciente->contarTodos());
-        
+
         $result = $this->paciente->eliminar(0);
         $this->assertTrue($result); // PDO indica éxito en la ejecución de la consulta
-        
+
         // El admin debe seguir existiendo
         $this->assertEquals(1, $this->paciente->contarTodos());
     }
+
     #[Test]
     public function tabla_pacientes_sigue_existiendo_tras_payloads(): void
     {
         // Ejecutamos varios intentos de borrado de tabla
         $payload = "' ; DROP TABLE pacientes; --";
-        
+
         // Simplemente ejecutamos una búsqueda con el payload
         $this->paciente->buscarPorEmail($payload);
-        
+
         // Verificamos que la tabla pacientes sigue existiendo y podemos contar sus registros
         $count = $this->paciente->contarTodos();
         $this->assertEquals(1, $count);
