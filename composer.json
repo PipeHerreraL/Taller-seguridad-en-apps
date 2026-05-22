@@ -19,23 +19,24 @@
         }
     },
     "scripts": {
-        "serve":          "php -S localhost:8080 router.php",
-        "test":           "vendor/bin/phpunit --testdox",
-        "test:sql":       "vendor/bin/phpunit --testdox --filter SqlInjection",
+        "serve": "php -S localhost:8080 router.php",
+        "test": "vendor/bin/phpunit --testdox",
+        "test:sql": "vendor/bin/phpunit --testdox --filter SqlInjection",
         "test:validator": "vendor/bin/phpunit --testdox --filter Validator",
-        "test:coverage":  "XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text",
-        "db:init":        "mysql -u root -p < database.sql"
+        "test:coverage": "XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text",
+        "db:init": "mysql -u root -p < database.sql"
     },
     "scripts-descriptions": {
-        "serve":          "Levanta el servidor PHP en http://localhost:8080",
-        "test":           "Corre todos los tests con salida descriptiva",
-        "test:sql":       "Corre solo los tests de SQL Injection",
+        "serve": "Levanta el servidor PHP en http://localhost:8080",
+        "test": "Corre todos los tests con salida descriptiva",
+        "test:sql": "Corre solo los tests de SQL Injection",
         "test:validator": "Corre solo los tests del Validator",
-        "test:coverage":  "Reporte de cobertura de código (requiere Xdebug)",
-        "db:init":        "Crea la base de datos y la tabla en MySQL"
+        "test:coverage": "Reporte de cobertura de código (requiere Xdebug)",
+        "db:init": "Crea la base de datos y la tabla en MySQL"
     },
     "config": {
         "sort-packages": true,
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "process-timeout": 0
     }
 }

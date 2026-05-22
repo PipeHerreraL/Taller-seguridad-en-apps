@@ -61,66 +61,46 @@ php composer.phar install
 ## 3 · Servidor de desarrollo
 
 ```bash
-# Levanta el servidor con public/ como document root
-php -S localhost:8080 -t public/
+# Levanta el servidor con el router para URLs sin .php
+php -S localhost:8080 router.php
 ```
+
+> **Importante:** usa `router.php` (no `-t public/`) para que las URLs
+> sin extensión como `/index` y `/pacientes` funcionen correctamente.
 
 | URL | Descripción |
 |---|---|
-| `http://localhost:8080/index.php` | Formula
+| `http://localhost:8080/` | Formulario de registro |
+| `http://localhost:8080/index` | Formulario de registro |
+| `http://localhost:8080/pacientes` | Listado de pacientes |
 
 
 
+## 4 · Comandos de Composer útiles
 
+El proyecto cuenta con varios comandos predefinidos en `composer.json` para facilitar el desarrollo:
 
+```bash
+# Iniciar el servidor local en http://localhost:8080 usando el enrutador
+composer serve
 
+# Ejecutar todas las pruebas con formato legible (--testdox)
+composer test
 
+# Ejecutar solo las pruebas de inyección SQL
+composer test:sql
 
+# Ejecutar solo las pruebas del validador de datos
+composer test:validator
 
+# Ejecutar pruebas con reporte de cobertura (requiere Xdebug)
+composer test:coverage
 
+# Inicializar la base de datos y la tabla desde database.sql
+composer db:init
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+---
 
 ## Estructura del proyecto
 
@@ -131,8 +111,9 @@ php -S localhost:8080 -t public/
 │   ├── pacientes.php        ← Listado de pacientes
 │   ├── register.php         ← Puente público para registro
 │   ├── delete.php           ← Puente público para eliminación
-│   └── assets/              ← CSS y JS estáticos
+│   └── assets/              ← CSS, JS y fuentes estáticas
 │       ├── css/styles.css
+│       ├── fonts/inter.woff2
 │       └── js/main.js
 ├── controllers/             ← Lógica POST (oculta del exterior por seguridad)
 │   ├── RegisterController.php
@@ -144,9 +125,9 @@ php -S localhost:8080 -t public/
 ├── tests/                   ← PHPUnit
 │   ├── SqlInjectionTest.php ← 22 casos con 9 payloads distintos
 │   └── ValidatorTest.php    ← 27 casos de validación
-├── docs/                    ← Documentación
-│   ├── diagrama-clases.md   ← Diagrama Mermaid
-│   └── README.md            ← Este archivo
+├── diagrama-clases.md       ← Diagrama Mermaid
+├── README.md                ← Este archivo
 ├── autoload.php             ← PSR-4 manual
 ├── composer.json
 ├── phpunit.xml
+```

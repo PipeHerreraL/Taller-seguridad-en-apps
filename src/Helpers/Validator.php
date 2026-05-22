@@ -88,7 +88,7 @@ class Validator
     /**
      * Valida formato de teléfono.
      */
-    public function phone(string $value, string $field): void
+    public function phone(string $value, string $field = 'telefono'): void
     {
         if (trim($value) === '') {
             return;
@@ -96,6 +96,27 @@ class Validator
         if (!preg_match('/^\+?[0-9]{7,15}$/', $value)) {
             $this->errors[$field] = "El formato de teléfono no es válido.";
         }
+    }
+
+    /**
+     * Valida que un campo no contenga caracteres especiales HTML/SQL peligrosos.
+     */
+    public function noSpecialChars(string $value, string $field): void
+    {
+        if (trim($value) === '') {
+            return;
+        }
+        if (preg_match('/[<>\'"]/', $value)) {
+            $this->errors[$field] = "El campo " . ucfirst($field) . " no puede contener caracteres especiales.";
+        }
+    }
+
+    /**
+     * Indica si hay errores de validación.
+     */
+    public function hasErrors(): bool
+    {
+        return !empty($this->errors);
     }
 
     /**

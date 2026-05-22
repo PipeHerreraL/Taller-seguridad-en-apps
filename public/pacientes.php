@@ -9,11 +9,12 @@ session_start();
 $success = $_SESSION['success'] ?? null;
 $errors  = $_SESSION['errors']  ?? [];
 unset($_SESSION['success'], $_SESSION['errors']);
-$pacienteModel = new Paciente();
+session_write_close();
 $pacientes     = [];
 $dbError       = null;
 try {
-    $pacientes = $pacienteModel->obtenerTodos();
+    $pacienteModel = new Paciente();
+    $pacientes     = $pacienteModel->obtenerTodos();
 } catch (\PDOException $e) {
     error_log('[pacientes.php] ' . $e->getMessage());
     $dbError = 'No se pudo conectar a la base de datos. Verifica que XAMPP esté activo.';
@@ -36,7 +37,8 @@ $tipoComun = array_key_first($tiposCount) ?? '—';
   <title>Pacientes Registrados — ClinicaApp</title>
   <meta name="description" content="Lista completa de pacientes registrados en ClinicaApp.">
   <meta name="theme-color" content="#0f0f1a">
-  <link rel="stylesheet" href="assets/css/styles.css?v=1.0.2">
+  <link rel="preload" href="assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/css/styles.css?v=1.0.6">
 </head>
 <body>
 <nav class="navbar">
@@ -48,12 +50,17 @@ $tipoComun = array_key_first($tiposCount) ?? '—';
     </div>
     ClinicaApp
   </a>
-  <div class="navbar-nav">
-    <a href="index"     class="nav-link"        id="nav-registro"><span class="nav-text">Registro</span></a>
-    <a href="pacientes" class="nav-link active" id="nav-pacientes"><span class="nav-text">Pacientes</span></a>
+  <button class="navbar-toggle" id="nav-toggle" aria-label="Abrir menú de navegación" aria-expanded="false">
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+  </button>
+  <div class="navbar-nav" id="navbar-menu">
+    <a href="index"     class="nav-link"        id="nav-registro">Registro</a>
+    <a href="pacientes" class="nav-link active" id="nav-pacientes">Pacientes</a>
   </div>
 </nav>
-<main class="container">
+<main class="container container-wide">
   <div class="page-header">
     <h1>Lista de <span>Pacientes</span></h1>
     <a href="index" class="btn btn-primary" id="btn-nuevo">
@@ -192,7 +199,7 @@ $tipoComun = array_key_first($tiposCount) ?? '—';
             <td class="copyable" data-copy="<?= htmlspecialchars($p['nombre'] . ' ' . $p['apellido'], ENT_QUOTES, 'UTF-8') ?>" data-sort-value="<?= htmlspecialchars($p['nombre'] . ' ' . $p['apellido'], ENT_QUOTES, 'UTF-8') ?>" title="Clic para copiar">
               <strong><?= htmlspecialchars($p['nombre'] . ' ' . $p['apellido'], ENT_QUOTES, 'UTF-8') ?></strong>
             </td>
-            <td class="copyable" data-copy="<?= htmlspecialchars($p['email'], ENT_QUOTES, 'UTF-8') ?>" title="Clic para copiar">
+            <td class="copyable cell-email" data-copy="<?= htmlspecialchars($p['email'], ENT_QUOTES, 'UTF-8') ?>" title="Clic para copiar">
               <?= htmlspecialchars($p['email'],           ENT_QUOTES, 'UTF-8') ?>
             </td>
             <td class="copyable" data-copy="<?= htmlspecialchars($p['telefono'], ENT_QUOTES, 'UTF-8') ?>" title="Clic para copiar">
@@ -267,6 +274,6 @@ $tipoComun = array_key_first($tiposCount) ?? '—';
 <footer>
   <p>ClinicaApp &copy; <?= date('Y') ?> — Taller de Seguridad en Aplicaciones Web · PHP + MySQL</p>
 </footer>
-<script src="assets/js/main.js" defer></script>
+<script src="assets/js/main.js?v=1.0.1" defer></script>
 </body>
 </html>

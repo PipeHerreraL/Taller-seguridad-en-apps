@@ -2,22 +2,50 @@
  * main.js
  * Scripts del lado del cliente:
  *  - Toggle de visibilidad de contraseña
+ *  - Activador de calendario (fecha de nacimiento)
  *  - Indicador de fortaleza de contraseña
  *  - Validación inmediata de campos (client-side)
  *  - Auto-dismiss de alertas
  */
 document.addEventListener('DOMContentLoaded', () => {
-  /* ── 1. Toggle de contraseña ─────────────────────────── */
+  /* ── 1. Toggle de contraseña ────────────────────────── */
   document.querySelectorAll('.toggle-password').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = document.getElementById(btn.dataset.target);
       if (!target) return;
       const isText = target.type === 'text';
       target.type = isText ? 'password' : 'text';
-      btn.textContent = isText ? '👁️' : '🙈';
+      
+      const eyeIcon = btn.querySelector('.icon-eye');
+      const eyeSlashIcon = btn.querySelector('.icon-eye-slash');
+      if (eyeIcon && eyeSlashIcon) {
+        if (isText) {
+          eyeIcon.style.display = 'inline-block';
+          eyeSlashIcon.style.display = 'none';
+          btn.setAttribute('aria-label', 'Ver contraseña');
+        } else {
+          eyeIcon.style.display = 'none';
+          eyeSlashIcon.style.display = 'inline-block';
+          btn.setAttribute('aria-label', 'Ocultar contraseña');
+        }
+      }
     });
   });
-  /* ── 2. Indicador de fortaleza de contraseña ─────────── */
+
+  /* ── 2. Activador de calendario ──────────────────────────── */
+  document.querySelectorAll('.calendar-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const inputId = btn.closest('.input-group')?.querySelector('input[type="date"]')?.id;
+      const dateInput = inputId ? document.getElementById(inputId) : null;
+      if (dateInput && typeof dateInput.showPicker === 'function') {
+        dateInput.showPicker();
+      } else if (dateInput) {
+        dateInput.focus(); // fallback para navegadores sin showPicker
+      }
+    });
+  });
+
+  /* ── 3. Indicador de fortaleza de contraseña ─────────── */
   const passwordInput = document.getElementById('password');
   const strengthFill = document.getElementById('strength-fill');
   const strengthText = document.getElementById('strength-text');
@@ -139,4 +167,126 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => alert.remove(), 500);
     }, delay);
   });
+
+  /* ── 5. Copiar al portapapeles ─────────────────────────── */
+  document.querySelectorAll('.copyable').forEach(cell => {
+    cell.addEventListener('click', () => {
+      const textToCopy = cell.dataset.copy || cell.textContent.trim();
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast(`Copiado: "${textToCopy}"`);
+      }).catch(err => {
+        console.error('Error al copiar al portapapeles:', err);
+      });
+    });
+  });
+
+  function showToast(message) {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `<span>📋</span> <span>${message}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add('fade-out');
+      setTimeout(() => {
+        toast.remove();
+        if (container.children.length === 0) container.remove();
+      }, 250);
+    }, 2500);
+  }
+
+  /* ── 6. Dropdown Actions ─────────────────────────────────── */
+  document.querySelectorAll('.dropdown-toggle').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const parent = btn.closest('.dropdown');
+      const cell = btn.closest('td');
+      const row = btn.closest('tr');
+
+      // Close other dropdowns
+      document.querySelectorAll('.dropdown').forEach(d => {
+        if (d !== parent) {
+          d.classList.remove('open');
+          d.classList.remove('dropdown-up');
+          d.closest('td')?.classList.remove('dropdown-active');
+          d.closest('tr')?.classList.remove('dropdown-active');
+        }
+      });
+
+      const isOpen = parent.classList.toggle('open');
+      if (isOpen) {
+        cell?.classList.add('dropdown-active');
+        row?.classList.add('dropdown-active');
+
+        // Check if there is enough space below the dropdown
+        const rect = parent.getBoundingClientRect();
+        const wrapper = btn.closest('.table-wrapper');
+        if (wrapper) {
+          const wrapperRect = wrapper.getBoundingClientRect();
+          const spaceBelow = wrapperRect.bottom - rect.bottom;
+          if (spaceBelow < 110) {
+            parent.classList.add('dropdown-up');
+          } else {
+            parent.classList.remove('dropdown-up');
+          }
+        }
+      } else {
+        parent.classList.remove('dropdown-up');
+        cell?.classList.remove('dropdown-active');
+        row?.classList.remove('dropdown-active');
+      }
+    });
+  });
+
+  // Stop propagation inside dropdown menu
+  document.querySelectorAll('.dropdown-menu').forEach(menu => {
+    menu.addEventListener('click', (e) => { e.stopPropagation(); });
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.dropdown').forEach(d => {
+      d.classList.remove('open');
+      d.classList.remove('dropdown-up');
+      d.closest('td')?.classList.remove('dropdown-active');
+      d.closest('tr')?.classList.remove('dropdown-active');
+    });
+  });
+
+  /* ── 7. Menú Hamburguesa Responsivo ─────────────────────────── */
+  const navToggle = document.getElementById('nav-toggle');
+  const navbarMenu = document.getElementById('navbar-menu');
+  if (navToggle && navbarMenu) {
+    navToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = navToggle.classList.toggle('open');
+      navbarMenu.classList.toggle('open', isOpen);
+      navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Close when clicking links inside menu
+    navbarMenu.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        navToggle.classList.remove('open');
+        navbarMenu.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!navToggle.contains(e.target) && !navbarMenu.contains(e.target)) {
+        navToggle.classList.remove('open');
+        navbarMenu.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
 });
+

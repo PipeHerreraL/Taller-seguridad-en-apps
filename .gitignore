@@ -15,3 +15,7 @@ Thumbs.db
 # Variables de entorno
 .env
 .env.*
+
+# Caché de pruebas (PHPUnit)
+.phpunit.result.cache
+.phpunit.cache/

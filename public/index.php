@@ -10,6 +10,7 @@ $success = $_SESSION['success'] ?? null;
 $errors  = $_SESSION['errors']  ?? [];
 $old     = $_SESSION['old']     ?? [];
 unset($_SESSION['success'], $_SESSION['errors'], $_SESSION['old']);
+session_write_close();
 $tiposSangre = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 $generosList = ['Masculino', 'Femenino', 'Otro', 'Prefiero no decir'];
 ?>
@@ -21,7 +22,8 @@ $generosList = ['Masculino', 'Femenino', 'Otro', 'Prefiero no decir'];
   <title>Registro de Pacientes — ClinicaApp</title>
   <meta name="description" content="Sistema de registro de pacientes con PHP + MySQL.">
   <meta name="theme-color" content="#0f0f1a">
-  <link rel="stylesheet" href="assets/css/styles.css?v=1.0.2">
+  <link rel="preload" href="assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/css/styles.css?v=1.0.6">
 </head>
 <body>
 <nav class="navbar">
@@ -33,9 +35,14 @@ $generosList = ['Masculino', 'Femenino', 'Otro', 'Prefiero no decir'];
     </div>
     ClinicaApp
   </a>
-  <div class="navbar-nav">
-    <a href="index"     class="nav-link active" id="nav-registro"><span class="nav-text">Registro</span></a>
-    <a href="pacientes" class="nav-link"        id="nav-pacientes"><span class="nav-text">Pacientes</span></a>
+  <button class="navbar-toggle" id="nav-toggle" aria-label="Abrir menú de navegación" aria-expanded="false">
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+  </button>
+  <div class="navbar-nav" id="navbar-menu">
+    <a href="index"     class="nav-link active" id="nav-registro">Registro</a>
+    <a href="pacientes" class="nav-link"        id="nav-pacientes">Pacientes</a>
   </div>
 </nav>
 <main class="container">
@@ -195,6 +202,6 @@ $generosList = ['Masculino', 'Femenino', 'Otro', 'Prefiero no decir'];
   <p>ClinicaApp &copy; <?= date('Y') ?> — Taller de Seguridad en Aplicaciones Web · PHP + MySQL</p>
 </footer>
 <!-- defer: el script se descarga en paralelo y ejecuta tras parsear el HTML -->
-<script src="assets/js/main.js" defer></script>
+<script src="assets/js/main.js?v=1.0.1" defer></script>
 </body>
 </html>
