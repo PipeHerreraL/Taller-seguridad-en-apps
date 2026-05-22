@@ -1,133 +1,176 @@
-# ClinicaApp — Guía de comandos
+# ClinicaApp — Sistema Seguro de Registro de Pacientes
+### Taller de Seguridad en Aplicaciones Web (Proyecto Académico)
 
-Sistema de Registro de Pacientes · Taller de Seguridad en Aplicaciones Web  
-Stack: **PHP 8.2 · MySQL · PDO · PHPUnit 11**
+Este proyecto es una aplicación web académica diseñada para servir como material práctico en la enseñanza de **Seguridad en Aplicaciones Web**. Demuestra la implementación de contramedidas robustas contra vulnerabilidades críticas de seguridad como **Inyección SQL (SQLi)**, **Cross-Site Scripting (XSS)** y la validación insegura de datos.
 
 ---
 
-## Requisitos previos
+## 🎯 Objetivos de Aprendizaje del Taller
 
-| Herramienta | Versión mínima |
+1. **Prevención de SQL Injection (SQLi)**: Analizar la diferencia entre la concatenación directa de parámetros en consultas SQL frente al uso de **sentencias preparadas (Prepared Statements)** mediante PDO.
+2. **Validación y Sanitización de Datos**: Diseñar y auditar reglas de validación del lado del servidor para evitar entradas maliciosas, desbordamientos de datos o formatos inválidos.
+3. **Prevención de Cross-Site Scripting (XSS)**: Comprender la importancia de escapar las salidas dynamic en HTML utilizando codificación segura de caracteres.
+4. **Seguridad en Sesiones y Rendimiento**: Analizar el manejo seguro de sesiones en PHP y mitigar bloqueos de concurrencia mediante `session_write_close()`.
+5. **Pruebas de Seguridad Automatizadas**: Escribir y ejecutar suites de pruebas unitarias y de penetración con PHPUnit para verificar la robustez del sistema ante payloads maliciosos.
+
+---
+
+## 🛠️ Stack Tecnológico y Requisitos
+
+| Componente | Requisito / Versión mínima |
 |---|---|
-| PHP | 8.1+ |
-| MySQL / MariaDB | 5.7+ |
-| Composer (incluido como `composer.phar`) | — |
-| Extensiones PHP | `pdo_mysql`, `pdo_sqlite` |
+| **Lenguaje** | PHP 8.2+ |
+| **Base de Datos** | MySQL 5.7+ / MariaDB 10.4+ |
+| **Gestor de Dependencias** | Composer (se incluye `composer.phar` para portabilidad) |
+| **Librería de Pruebas** | PHPUnit 11.5+ |
+| **Extensiones PHP necesarias** | `pdo`, `pdo_mysql`, `mbstring` |
 
 ---
 
-## 1 · Base de datos
+## 1. Configuración de la Base de Datos
 
-### Con MySQL en Homebrew (macOS)
+El script de inicialización de la base de datos se encuentra en `database.sql`.
 
+### Opción A: Con MySQL en Homebrew (macOS)
 ```bash
-# Iniciar el servicio
+# Iniciar el servicio de MySQL
 brew services start mysql
 
-# Crear la base de datos y la tabla
+# Crear e inicializar la base de datos (con usuario root)
 mysql -u root -p < database.sql
 ```
 
-### Con XAMPP
+### Opción B: Con XAMPP / MAMP
+1. Inicia los servicios de **Apache** y **MySQL** desde el panel de control de tu suite local.
+2. Abre la consola de administración de base de datos o dirígete a `http://localhost/phpmyadmin`.
+3. Crea una base de datos llamada `clinica_db`.
+4. Importa el archivo `database.sql` o ejecuta su contenido desde la pestaña **SQL**.
 
-1. Abre el panel de XAMPP e inicia **Apache** y **MySQL**.
-2. Ve a `http://localhost/phpmyadmin`.
-3. Abre la pestaña **SQL**, pega el contenido de `database.sql` y ejecuta.
+### Credenciales de Conexión
+El archivo de configuración de la base de datos se encuentra en `src/Config/Database.php`. Por defecto, está configurado para un entorno local estándar:
+* **Host**: `localhost`
+* **Base de Datos**: `clinica_db`
+* **Usuario**: `root`
+* **Contraseña**: *(vacía)*
 
-### Credenciales por defecto
-
-El archivo `src/Config/Database.php` usa:
-
-```
-host:     localhost
-database: clinica_db
-user:     root
-password: (vacío)
-```
-
-Edita ese archivo si tu configuración es diferente.
+*Si tu base de datos requiere credenciales personalizadas, puedes editarlas en dicho archivo.*
 
 ---
 
-## 2 · Dependencias de desarrollo
+## 2. Instalación de Dependencias
+
+Para instalar la suite de pruebas PHPUnit y las utilidades de desarrollo en tu entorno local:
 
 ```bash
-# Instala PHPUnit y sus dependencias (solo en dev)
+# Instalar dependencias a través de Composer
 php composer.phar install
 ```
 
 ---
 
-## 3 · Servidor de desarrollo
+## 3. Servidor de Desarrollo Local
+
+El proyecto incluye un enrutador personalizado (`router.php`) para emular el comportamiento de URLs amigables (sin la extensión `.php` en la barra del navegador):
 
 ```bash
-# Levanta el servidor con el router para URLs sin .php
-php -S localhost:8080 router.php
-```
-
-> **Importante:** usa `router.php` (no `-t public/`) para que las URLs
-> sin extensión como `/index` y `/pacientes` funcionen correctamente.
-
-| URL | Descripción |
-|---|---|
-| `http://localhost:8080/` | Formulario de registro |
-| `http://localhost:8080/index` | Formulario de registro |
-| `http://localhost:8080/pacientes` | Listado de pacientes |
-
-
-
-## 4 · Comandos de Composer útiles
-
-El proyecto cuenta con varios comandos predefinidos en `composer.json` para facilitar el desarrollo:
-
-```bash
-# Iniciar el servidor local en http://localhost:8080 usando el enrutador
+# Levantar el servidor local
 composer serve
-
-# Ejecutar todas las pruebas con formato legible (--testdox)
-composer test
-
-# Ejecutar solo las pruebas de inyección SQL
-composer test:sql
-
-# Ejecutar solo las pruebas del validador de datos
-composer test:validator
-
-# Ejecutar pruebas con reporte de cobertura (requiere Xdebug)
-composer test:coverage
-
-# Inicializar la base de datos y la tabla desde database.sql
-composer db:init
 ```
+
+> 💡 **Nota:** El comando `composer serve` ejecuta internamente `php -S localhost:8080 router.php`. El enrutador intercepta las peticiones estáticas, inyecta encabezados de control de caché (`Cache-Control: no-cache, must-revalidate` para evitar el almacenamiento local obsoleto durante la fase de desarrollo) y procesa los controladores internos de manera segura.
+
+### URLs de Acceso:
+* **Página de Registro (Formulario)**: `http://localhost:8080/index` o `http://localhost:8080/`
+* **Listado de Pacientes**: `http://localhost:8080/pacientes`
 
 ---
 
-## Estructura del proyecto
+## 🔒 Arquitectura de Seguridad Implementada
+
+La aplicación sigue una arquitectura Modelo-Vista-Controlador (MVC) estricta, separando la capa de presentación pública de la lógica de procesamiento.
+
+### A. Prevención de Inyección SQL (SQLi)
+Toda interacción con la base de datos en [Paciente.php](file:///Users/rondoo/Documents/GitHub/Taller-seguridad-en-apps/src/Models/Paciente.php) utiliza placeholders y parámetros vinculados (**parameterized queries**):
+```php
+// Ejemplo de consulta segura en el Modelo
+$stmt = $this->db->prepare("INSERT INTO pacientes (nombre, apellido, email, telefono, fecha_nacimiento, tipo_sangre, genero) 
+                            VALUES (:nombre, :apellido, :email, :telefono, :fecha_nacimiento, :tipo_sangre, :genero)");
+$stmt->execute($data);
+```
+Esto garantiza que la base de datos precompile la consulta y trate el input del usuario estrictamente como datos, neutralizando payloads de inyección SQL comunes como `' OR '1'='1` o `UNION SELECT`.
+
+### B. Validación y Sanitización Rigurosa (Input Validation)
+El componente [Validator.php](file:///Users/rondoo/Documents/GitHub/Taller-seguridad-en-apps/src/Helpers/Validator.php) implementa validación del lado del servidor (Server-side Validation):
+* **Tipos de datos estrictos**: Validación de formato telefónico, formato de email estándar y formato de fecha.
+* **Límites de longitud**: Validación de longitudes mínimas y máximas para evitar ataques de desbordamiento de búfer o denegación de servicio.
+* **Restricción de caracteres**: Bloqueo de caracteres de etiquetado HTML y comillas mediante reglas personalizadas (`noSpecialChars`) para campos sensibles.
+
+### C. Mitigación de Cross-Site Scripting (XSS)
+Al renderizar datos almacenados en la base de datos en las vistas de pacientes, se realiza una codificación de salida (**output escaping**) obligatoria:
+```html
+<!-- Ejemplo de salida segura contra XSS -->
+<td><?= htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8') ?></td>
+```
+Esto convierte caracteres especiales como `<` y `>` en sus entidades HTML equivalentes (`&lt;` y `&gt;`), previniendo la ejecución de scripts maliciosos cargados en la base de datos.
+
+### D. Seguridad y Rendimiento de Sesiones
+En los controladores de procesamiento, se utiliza `session_write_close()` tan pronto como las variables de sesión son leídas. Esto libera el bloqueo de archivos de sesión de PHP, permitiendo cargas asíncronas concurrentes rápidas y mejorando la protección contra ataques de fijación de sesión al limitar la exposición de la sesión en memoria.
+
+---
+
+## 🧪 Pruebas de Seguridad y Calidad (Testing)
+
+El proyecto cuenta con un conjunto extenso de pruebas automatizadas escritas en PHPUnit que demuestran la seguridad frente a vectores de ataque conocidos.
+
+### Comandos de Pruebas:
+```bash
+# Ejecutar todas las pruebas del proyecto (con formato testdox)
+composer test
+
+# Ejecutar únicamente las pruebas de inyección SQL
+composer test:sql
+
+# Ejecutar únicamente las pruebas del validador
+composer test:validator
+
+# Ejecutar cobertura de pruebas (requiere Xdebug activo)
+composer test:coverage
+```
+
+### Descripción de las suites:
+1. **`tests/SqlInjectionTest.php`**: Simula el envío de formularios de registro y eliminación inyectando múltiples payloads SQLi comunes en diferentes campos (como nombres, correos y IDs). Valida que la base de datos rechace la inyección o no altere su comportamiento y que la integridad de los datos permanezca intacta.
+2. **`tests/ValidatorTest.php`**: Comprueba el comportamiento del validador ante valores nulos, correos sintácticamente incorrectos, fechas inconsistentes, inyecciones de código HTML y longitudes excesivas.
+
+---
+
+## 📂 Estructura del Directorio del Proyecto
 
 ```
 /
-├── public/                  ← Document root (entry-points del navegador)
-│   ├── index.php            ← Formulario de registro
-│   ├── pacientes.php        ← Listado de pacientes
-│   ├── register.php         ← Puente público para registro
-│   ├── delete.php           ← Puente público para eliminación
-│   └── assets/              ← CSS, JS y fuentes estáticas
-│       ├── css/styles.css
-│       ├── fonts/inter.woff2
-│       └── js/main.js
-├── controllers/             ← Lógica POST (oculta del exterior por seguridad)
+├── public/                  ← Raíz del servidor (Document Root)
+│   ├── views/               ← Vistas HTML/PHP del lado del cliente
+│   │   ├── index.php        ← Vista: Formulario de registro de pacientes
+│   │   └── pacientes.php    ← Vista: Tabla de pacientes registrados
+│   ├── controllers/         ← Scripts de enrutamiento/puente para controladores
+│   │   ├── register.php     ← Puente público para inserción de datos
+│   │   └── delete.php       ← Puente público para eliminación de datos
+│   └── assets/              ← Recursos estáticos
+│       ├── css/styles.css   ← Estilos y diseño responsivo adaptado
+│       ├── fonts/           ← Fuentes de texto locales (Inter)
+│       └── js/main.js       ← Validación visual e interactividad responsiva
+├── controllers/             ← Capa de Control (Lógica POST oculta al exterior)
 │   ├── RegisterController.php
 │   └── DeleteController.php
-├── src/                     ← Clases con namespace App\
-│   ├── Config/Database.php  ← Singleton PDO
-│   ├── Models/Paciente.php  ← CRUD con prepared statements
-│   └── Helpers/Validator.php← Validación y sanitización
-├── tests/                   ← PHPUnit
-│   ├── SqlInjectionTest.php ← 22 casos con 9 payloads distintos
-│   └── ValidatorTest.php    ← 27 casos de validación
-├── diagrama-clases.md       ← Diagrama Mermaid
-├── README.md                ← Este archivo
-├── autoload.php             ← PSR-4 manual
-├── composer.json
-├── phpunit.xml
+├── src/                     ← Clases principales (Namespace App\)
+│   ├── Config/Database.php  ← Conexión única segura (Patrón Singleton PDO)
+│   ├── Models/Paciente.php  ← CRUD del Paciente y consultas parametrizadas
+│   └── Helpers/Validator.php← Reglas de validación y sanitización
+├── tests/                   ← Suite de Pruebas Unitarias y de Seguridad
+│   ├── SqlInjectionTest.php ← Casos de ataque SQLi simulados
+│   └── ValidatorTest.php    ← Casos de pruebas de reglas de validación
+├── diagrama-clases.md       ← Documentación visual del diagrama de clases (Mermaid)
+├── README.md                ← Este archivo explicativo académico
+├── autoload.php             ← Autocargador manual basado en PSR-4
+├── composer.json            ← Configuración de dependencias y scripts de desarrollo
+└── phpunit.xml              ← Configuración para pruebas automatizadas con PHPUnit
 ```

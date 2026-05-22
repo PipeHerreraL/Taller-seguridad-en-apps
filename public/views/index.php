@@ -1,10 +1,9 @@
 <?php
 declare(strict_types=1);
 /**
- * public/index.php — Página de registro de pacientes.
- * Es el único entry-point del formulario; todo lo privado queda fuera de public/.
+ * public/views/index.php — Vista: Página de registro de pacientes.
  */
-require_once __DIR__ . '/../autoload.php';
+require_once __DIR__ . '/../../autoload.php';
 session_start();
 $success = $_SESSION['success'] ?? null;
 $errors  = $_SESSION['errors']  ?? [];
@@ -200,7 +199,7 @@ $generosList = ['Masculino', 'Femenino', 'Otro', 'Prefiero no decir'];
 </main>
 <footer>
   <p>ClinicaApp &copy; <?= date('Y') ?> — Taller de Seguridad en Aplicaciones Web · PHP + MySQL</p>
-</footer>
+ </footer>
 <!-- defer: el script se descarga en paralelo y ejecuta tras parsear el HTML -->
 <script src="assets/js/main.js?v=1.0.1" defer></script>
 </body>

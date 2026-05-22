@@ -1,12 +1,21 @@
 <?php
-$uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+declare(strict_types=1);
 
+$uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 $publicDir = __DIR__ . '/public';
 $staticFile = $publicDir . $uri;
 
-// Serve existing static files (css, js, images, etc.) from public/
+// 1. Serve existing static files (css, js, images, fonts, etc.) from public/
 if ($uri !== '/' && file_exists($staticFile) && !is_dir($staticFile)) {
     $ext = pathinfo($staticFile, PATHINFO_EXTENSION);
+    
+    // Security check: Never serve raw PHP files statically (prevents source code disclosure)
+    if ($ext === 'php') {
+        http_response_code(403);
+        echo '<h1>403 — Acceso prohibido</h1>';
+        exit;
+    }
+
     $mimeTypes = [
         'css'   => 'text/css',
         'js'    => 'application/javascript',
@@ -25,17 +34,15 @@ if ($uri !== '/' && file_exists($staticFile) && !is_dir($staticFile)) {
     ];
     $contentType = $mimeTypes[$ext] ?? 'application/octet-stream';
     
-    // Obtener metadatos del archivo para la validación de caché
+    // Get file metadata for cache validation (ETag / Last-Modified)
     $mtime = filemtime($staticFile);
-    $etag = md5($staticFile . $mtime); // Rápido y único para desarrollo
+    $etag = md5($staticFile . $mtime);
     
-    // Configurar cabeceras de caché del cliente
     header("Content-Type: $contentType");
     header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $mtime) . ' GMT');
     header("ETag: \"$etag\"");
-    header('Cache-Control: no-cache, must-revalidate'); // Revalidar siempre con el servidor (ETag)
+    header('Cache-Control: no-cache, must-revalidate');
     
-    // Comprobar si el navegador ya tiene la versión actual en caché
     if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === "\"$etag\"") {
         http_response_code(304);
         exit;
@@ -49,18 +56,21 @@ if ($uri !== '/' && file_exists($staticFile) && !is_dir($staticFile)) {
     exit;
 }
 
-// Rewrite extensionless URL to PHP file if it exists in public/
-if (file_exists($publicDir . $uri . '.php')) {
-    include_once $publicDir . $uri . '.php';
+// 2. Define custom routing map for the clean URLs to point to grouped views & controllers
+$routes = [
+    '/'          => '/views/index.php',
+    '/index'     => '/views/index.php',
+    '/pacientes' => '/views/pacientes.php',
+    '/register'  => '/controllers/register.php',
+    '/delete'    => '/controllers/delete.php'
+];
+
+if (isset($routes[$uri])) {
+    include_once $publicDir . $routes[$uri];
     exit;
 }
 
-// Default fallback for root
-if ($uri === '/') {
-    include_once $publicDir . '/index.php';
-    exit;
-}
-
-// 404 fallback
+// 3. 404 fallback
 http_response_code(404);
 echo '<h1>404 — Página no encontrada</h1>';
+exit;
