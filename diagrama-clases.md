@@ -23,6 +23,10 @@ classDiagram
             <<Controller>>
             +controllers/DeleteController.php
         }
+        class ChatController {
+            <<Controller>>
+            +controllers/ChatController.php
+        }
     }
 
     namespace Presentacion {
@@ -50,6 +54,10 @@ classDiagram
             <<Partial>>
             +views/templates/footer.php
         }
+        class ChatWidget {
+            <<UI Component>>
+            +chat.js
+        }
     }
 
     namespace Helpers {
@@ -71,6 +79,18 @@ classDiagram
         class EnvLoader {
             +load(path) void$
         }
+        class GroqClient {
+            -apiKey : string
+            -model : string
+            -apiUrl : string
+            -pacienteModel : Paciente
+            +chat(userMessage) string
+            -getSystemPrompt() string
+            -getToolsDefinition() array
+            -executeTool(name, args) array
+            -makeRequest(messages, tools) array
+            -chatMock(userMessage) string
+        }
     }
 
     namespace Modelos_y_Datos {
@@ -82,6 +102,7 @@ classDiagram
             +buscarPorEmail(email) array|false
             +eliminar(id) bool
             +contarTodos() int
+            +buscarPorNombreCompleto(nombre) array
         }
         class Database {
             <<Singleton>>
@@ -109,6 +130,13 @@ classDiagram
             +testPhone()
             +testSanitize()
         }
+        class ChatSecurityTest {
+            <<Test>>
+            +testBuscarPorNombreExcluyePasswordHash()
+            +testBuscarPacienteConSQLInjectionNoFallaNiAlteraTablas()
+            +testAsistenteRechazaPeticionesDeEscrituraOModificacion()
+            +testAsistenteRespondePreguntasDeLecturaCorrectamente()
+        }
     }
 
     %% ── Enrutamiento y Flujo de Peticiones ──────────────────────────
@@ -119,6 +147,7 @@ classDiagram
     FrontController ..> PacientesView : Carga (/pacientes)
     FrontController ..> RegisterController : Invoca (/register)
     FrontController ..> DeleteController : Invoca (/delete)
+    FrontController ..> ChatController : Invoca (/chat)
     FrontController ..> Error404View : Carga (404 Fallback)
     
     %% ── Inclusión de Plantillas Comunes ─────────────────────────────
@@ -130,11 +159,17 @@ classDiagram
     Error403View ..> FooterTemplate : Incluye
     Error404View ..> HeaderTemplate : Incluye
     Error404View ..> FooterTemplate : Incluye
+    
+    FooterTemplate ..> ChatWidget : Renderiza e incluye chat.js
 
     %% ── Relaciones del Controlador (Lógica de Negocio) ──────────────
     RegisterController ..> Validator : Valida datos
     RegisterController ..> Paciente : Crea registro
     DeleteController ..> Paciente : Elimina registro
+    ChatController ..> Validator : Sanitiza consulta
+    ChatController ..> GroqClient : Delega razonamiento IA
+    GroqClient ..> Paciente : Ejecuta herramientas seguras (Tool Calling)
+    ChatWidget ..> ChatController : Consulta AJAX POST (/chat)
 
     %% ── Acceso a Datos e Infraestructura ────────────────────────────
     Paciente ..> Database : Obtiene conexión PDO
@@ -143,4 +178,7 @@ classDiagram
     %% ── Suite de Pruebas Automatizadas ──────────────────────────────
     SqlInjectionTest ..> Paciente : Audita seguridad SQLi
     ValidatorTest ..> Validator : Audita reglas de validación
+    ChatSecurityTest ..> GroqClient : Audita seguridad IA y Mock
+    ChatSecurityTest ..> Paciente : Audita prevención fuga hashes y SQLi
+```,StartLine:9,TargetContent:
 ```

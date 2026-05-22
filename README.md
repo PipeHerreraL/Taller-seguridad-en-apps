@@ -116,6 +116,13 @@ Esto convierte caracteres especiales como `<` y `>` en sus entidades HTML equiva
 ### D. Seguridad y Rendimiento de Sesiones
 En los controladores de procesamiento, se utiliza `session_write_close()` tan pronto como las variables de sesión son leídas. Esto libera el bloqueo de archivos de sesión de PHP, permitiendo cargas asíncronas concurrentes rápidas y mejorando la protección contra ataques de fijación de sesión al limitar la exposición de la sesión en memoria.
 
+### E. Asistente IA (Mini-Chat) Seguro con Groq Cloud
+Se incluye un mini-chat de asistencia clínica virtual en tiempo real potenciado por el modelo **Llama 3** a través de la API de Groq Cloud:
+* **Prevención de Text-to-SQL (SQL Injection)**: El asistente no tiene la capacidad de escribir o ejecutar sentencias SQL arbitrarias directamente. En su lugar, se implementa **Tool Calling (Llamada a Funciones)**. Groq analiza la intención del usuario y decide invocar herramientas locales predefinidas (`contar_pacientes`, `buscar_paciente_por_nombre`, `obtener_rh_mas_comun`) que ejecutan código PHP seguro con consultas parametrizadas PDO.
+* **Control de Lectura Exclusiva (Read-Only)**: El system prompt restringe al LLM a funciones de consulta básica. Adicionalmente, el controlador y el cliente de Groq interceptan y bloquean proactivamente cualquier palabra clave de modificación de datos (`insertar`, `borrar`, `eliminar`, `actualizar`, `delete`, `drop`, `update`, etc.).
+* **Prevención de Fuga de Credenciales (Credential Leaks)**: Las búsquedas en base de datos retornan exclusivamente campos públicos (`nombre`, `telefono`, `email`, `tipo_sangre`, `genero`). El campo sensible `password_hash` nunca se selecciona en estas consultas, evitando fugas accidentales hacia el proveedor de LLM.
+* **Resiliencia y Modo Mock**: Si la variable `GROQ_API_KEY` en el archivo `.env` está ausente o tiene el valor `mock`, el cliente Groq activa un simulador local (*Mock*) mediante expresiones regulares que emula el comportamiento de llamadas y bloqueos. Esto asegura que la suite de pruebas funcione sin conectividad a internet ni claves de API activas.
+
 ---
 
 ## 🧪 Pruebas de Seguridad y Calidad (Testing)
@@ -133,6 +140,9 @@ composer test:sql
 # Ejecutar únicamente las pruebas del validador
 composer test:validator
 
+# Ejecutar únicamente las pruebas de seguridad del chat asistente
+./vendor/bin/phpunit --filter ChatSecurityTest
+
 # Ejecutar cobertura de pruebas (requiere Xdebug activo)
 composer test:coverage
 ```
@@ -140,6 +150,7 @@ composer test:coverage
 ### Descripción de las suites:
 1. **`tests/SqlInjectionTest.php`**: Simula el envío de formularios de registro y eliminación inyectando múltiples payloads SQLi comunes en diferentes campos (como nombres, correos y IDs). Valida que la base de datos rechace la inyección o no altere su comportamiento y que la integridad de los datos permanezca intacta.
 2. **`tests/ValidatorTest.php`**: Comprueba el comportamiento del validador ante valores nulos, correos sintácticamente incorrectos, fechas inconsistentes, inyecciones de código HTML y longitudes excesivas.
+3. **`tests/ChatSecurityTest.php`**: Audita los límites del chatbot y modelo de pacientes. Verifica que la búsqueda por coincidencia parcial no filtre hashes de contraseñas, que payloads de inyección SQL no alteren la lógica de consulta y que el asistente en modo Mock bloquee peticiones destructivas.
 
 ---
 
@@ -150,28 +161,36 @@ composer test:coverage
 ├── public/                  ← Raíz del servidor (Document Root)
 │   ├── index.php            ← Front Controller: punto único de entrada para peticiones dinámicas
 │   └── assets/              ← Recursos estáticos
-│       ├── css/styles.css   ← Estilos y diseño responsivo adaptado
+│       ├── css/styles.css   ← Estilos y diseño responsivo adaptado con chat
 │       ├── fonts/           ← Fuentes de texto locales (Inter)
-│       └── js/main.js       ← Validación visual e interactividad responsiva
+│       └── js/              ← Lógica JS del lado del cliente
+│           ├── main.js      ← Validación visual e interactividad responsiva
+│           └── chat.js      ← Lógica de interacción AJAX y escape XSS del mini-chat
 ├── views/                   ← Capa de Presentación (Vistas fuera del document root por seguridad)
 │   ├── templates/           ← Plantillas reutilizables (DRY)
 │   │   ├── header.php       ← Cabecera de página común y barra de navegación
-│   │   └── footer.php       ← Pie de página común y carga de scripts JS
+│   │   └── footer.php       ← Pie de página común con widget de chat embebido
 │   ├── 403.php              ← Vista: Página de error 403 (Acceso Prohibido) personalizada
 │   ├── 404.php              ← Vista: Página de error 404 personalizada
 │   ├── index.php            ← Vista: Formulario de registro de pacientes
 │   └── pacientes.php        ← Vista: Tabla de pacientes registrados
 ├── controllers/             ← Capa de Control (Lógica POST oculta al exterior)
 │   ├── RegisterController.php
-│   └── DeleteController.php
+│   ├── DeleteController.php
+│   └── ChatController.php   ← Controlador del asistente: recibe preguntas del chat
 ├── logs/                    ← Registro de solicitudes y auditoría (app.log)
 ├── src/                     ← Clases principales (Namespace App\)
 │   ├── Config/Database.php  ← Conexión única segura (Patrón Singleton PDO)
 │   ├── Models/Paciente.php  ← CRUD del Paciente y consultas parametrizadas
-│   └── Helpers/Validator.php← Reglas de validación y sanitización
+│   └── Helpers/             ← Clases auxiliares
+│       ├── Validator.php    ← Reglas de validación y sanitización
+│       ├── EnvLoader.php    ← Cargador de variables .env
+│       ├── Logger.php       ← Registrador seguro de accesos
+│       └── GroqClient.php   ← Cliente de comunicación con la API de Groq y Mock
 ├── tests/                   ← Suite de Pruebas Unitarias y de Seguridad
 │   ├── SqlInjectionTest.php ← Casos de ataque SQLi simulados
-│   └── ValidatorTest.php    ← Casos de pruebas de reglas de validación
+│   ├── ValidatorTest.php    ← Casos de pruebas de reglas de validación
+│   └── ChatSecurityTest.php ← Casos de prueba de seguridad y bloqueo del asistente IA
 ├── diagrama-clases.md       ← Documentación visual del diagrama de clases (Mermaid)
 ├── README.md                ← Este archivo explicativo académico
 ├── autoload.php             ← Autocargador manual basado en PSR-4

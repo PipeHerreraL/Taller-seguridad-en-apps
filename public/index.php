@@ -32,7 +32,8 @@ $routes = [
     '/pacientes'     => __DIR__ . '/../views/pacientes.php',
     '/pacientes.php' => __DIR__ . '/../views/pacientes.php',
     '/register'      => __DIR__ . '/../controllers/RegisterController.php',
-    '/delete'        => __DIR__ . '/../controllers/DeleteController.php'
+    '/delete'        => __DIR__ . '/../controllers/DeleteController.php',
+    '/chat'          => __DIR__ . '/../controllers/ChatController.php'
 ];
 
 if (isset($routes[$uri])) {
