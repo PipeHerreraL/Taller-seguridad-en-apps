@@ -8,6 +8,7 @@ use App\Helpers\ChatContext;
 use App\Helpers\GroqClient;
 use App\Models\Paciente;
 use PDO;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 /**
