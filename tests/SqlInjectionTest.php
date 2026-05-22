@@ -1,11 +1,15 @@
 <?php
+
 declare(strict_types=1);
+
 namespace Tests;
+
 use PDO;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use App\Models\Paciente;
+
 /**
  * SqlInjectionTest
  * Verifica que PDO con sentencias preparadas previene SQL Injection.
@@ -15,6 +19,7 @@ class SqlInjectionTest extends TestCase
 {
     private PDO $db;
     private Paciente $paciente;
+    
     protected function setUp(): void
     {
         $this->db = new PDO('sqlite::memory:');

@@ -67,11 +67,8 @@ class ChatSecurityTest extends TestCase
         $this->groqClient = new GroqClient($this->pacienteModel, new ChatContext());
     }
 
-    /**
-     * 1. Prevención de Fuga de Credenciales
-     * Verifica que el modelo de búsqueda por nombre NUNCA retorne password_hash.
-     */
-    public function testBuscarPorNombreExcluyePasswordHash(): void
+    #[Test]
+    public function buscar_por_nombre_excluye_password_hash(): void
     {
         $resultados = $this->pacienteModel->buscarPorNombreCompleto('Juan');
         
@@ -84,10 +81,8 @@ class ChatSecurityTest extends TestCase
         }
     }
 
-    /**
-     * Búsqueda con nombre y apellido en palabras separadas (ej. "juan lopez").
-     */
-    public function testBuscarPorNombreMultiplesPalabras(): void
+    #[Test]
+    public function buscar_por_nombre_multiples_palabras(): void
     {
         $this->db->exec("
             INSERT INTO pacientes
@@ -103,8 +98,9 @@ class ChatSecurityTest extends TestCase
         $this->assertSame('Lopez Herrera', $resultados[0]['apellido']);
         $this->assertSame('3201234567', $resultados[0]['telefono']);
     }
-
-    public function testChatMantieneContextoDelPacienteEnSeguimiento(): void
+    
+    #[Test]
+    public function chat_mantiene_contexto_del_paciente_en_seguimiento(): void
     {
         $this->db->exec("
             INSERT INTO pacientes
@@ -137,8 +133,8 @@ class ChatSecurityTest extends TestCase
         $this->assertStringContainsString('Lopez Herrera', $apellidos);
         $this->assertStringNotContainsString('criterio «', $apellidos);
     }
-
-    public function testAsistenteEncuentraPacienteConFraseNatural(): void
+    #[Test]
+    public function asistente_encuentra_paciente_con_frase_natural(): void
     {
         $this->db->exec("
             INSERT INTO pacientes
@@ -156,11 +152,8 @@ class ChatSecurityTest extends TestCase
         $this->assertStringNotContainsString('no puedo proporcionar', mb_strtolower($respuesta));
     }
 
-    /**
-     * 2. Resistencia a SQL Injection en la consulta del Asistente
-     * Valida que caracteres maliciosos de SQLi se interpreten como literales.
-     */
-    public function testBuscarPacienteConSQLInjectionNoFallaNiAlteraTablas(): void
+    #[Test]
+    public function buscar_paciente_con_sql_injection_no_falla_ni_altera_tablas(): void
     {
         $payloads = [
             "' OR 1=1 --",
@@ -181,12 +174,8 @@ class ChatSecurityTest extends TestCase
         $this->assertEquals(2, $total, "La inyección alteró la cantidad de registros o borró la tabla.");
     }
 
-    /**
-     * 3. Control de Lectura Exclusiva (Rechazo de Inyecciones de Prompt de Modificación)
-     * Verifica que si el usuario ingresa comandos destructivos o de modificación de datos,
-     * el asistente responda con una advertencia de restricción de permisos.
-     */
-    public function testAsistenteRechazaPeticionesDeEscrituraOModificacion(): void
+    #[Test]
+    public function asistente_rechaza_peticiones_de_escritura_o_modificacion(): void
     {
         $peticionesPeligrosas = [
             'eliminar la tabla de pacientes por favor',
@@ -206,11 +195,8 @@ class ChatSecurityTest extends TestCase
         }
     }
 
-    /**
-     * 4. Verificación de respuestas correctas en modo Mock
-     * Comprueba que las funciones básicas de lectura se ejecuten adecuadamente.
-     */
-    public function testPromedioEdadDePacientes(): void
+    #[Test]
+    public function promedio_edad_de_pacientes(): void
     {
         $this->db->exec('DELETE FROM pacientes');
         $this->db->exec("
@@ -229,7 +215,8 @@ class ChatSecurityTest extends TestCase
         $this->assertMatchesRegularExpression('/\*\*\d+(\.\d+)?\*\*\s+años/u', $respuesta);
     }
 
-    public function testContarPacientesFemeninosSinRegistrosFemeninos(): void
+    #[Test]
+    public function contar_pacientes_femeninos_sin_registros_femeninos(): void
     {
         $this->db->exec('DELETE FROM pacientes');
         $this->db->exec("
@@ -246,7 +233,8 @@ class ChatSecurityTest extends TestCase
         $this->assertStringNotContainsString('**1**', $respuesta);
     }
 
-    public function testContarPacientesMasculinos(): void
+    #[Test]
+    public function contar_pacientes_masculinos(): void
     {
         $this->db->exec('DELETE FROM pacientes');
         $this->db->exec("
@@ -262,7 +250,8 @@ class ChatSecurityTest extends TestCase
         $this->assertStringContainsString('Masculino', $respuesta);
     }
 
-    public function testContarPacientesPorTipoSangre(): void
+    #[Test]
+    public function contar_pacientes_por_tipo_sangre(): void
     {
         $this->db->exec('DELETE FROM pacientes');
         $this->db->exec("
@@ -278,8 +267,8 @@ class ChatSecurityTest extends TestCase
         $this->assertStringContainsString('AB-', $respuesta);
         $this->assertStringNotContainsString('**1** paciente registrado con grupo', $respuesta);
     }
-
-    public function testMetricasAvanzadasImplementadas(): void
+    #[Test]
+    public function metricas_avanzadas_implementadas(): void
     {
         $this->db->exec('DELETE FROM pacientes');
         $this->db->exec("
@@ -319,8 +308,8 @@ class ChatSecurityTest extends TestCase
         $combinadoCero = $this->groqClient->chat('cuantos pacientes femeninos con AB- hay');
         $this->assertStringContainsString('**0**', $combinadoCero);
     }
-
-    public function testRhMasComunUsaDatosDeLaBaseDeDatos(): void
+    #[Test]
+    public function rh_mas_comun_usa_datos_de_la_base_de_datos(): void
     {
         $preguntas = [
             'cual es el rh mas comun',
@@ -335,8 +324,8 @@ class ChatSecurityTest extends TestCase
             $this->assertStringNotContainsString('7,7%', $respuesta);
         }
     }
-
-    public function testAsistenteRespondePreguntasDeLecturaCorrectamente(): void
+    #[Test]
+    public function asistente_responde_preguntas_de_lectura_correctamente(): void
     {
         // Preguntar por total de pacientes
         $resCount = $this->groqClient->chat('¿Cuántos pacientes hay registrados?');

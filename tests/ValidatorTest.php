@@ -1,9 +1,13 @@
 <?php
+
 declare(strict_types=1);
+
 namespace Tests;
+
 use App\Helpers\Validator;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+
 /**
  * ValidatorTest
  * Verifica todas las reglas de validación y sanitización.
@@ -12,11 +16,12 @@ use PHPUnit\Framework\TestCase;
 class ValidatorTest extends TestCase
 {
     private Validator $v;
+
     protected function setUp(): void
     {
         $this->v = new Validator();
     }
-    // ── required ─────────────────────────────────────────────
+
     #[Test]
     public function required_falla_con_cadena_vacia(): void
     {
