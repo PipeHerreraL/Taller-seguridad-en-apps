@@ -154,6 +154,9 @@ composer test:coverage
 │       ├── fonts/           ← Fuentes de texto locales (Inter)
 │       └── js/main.js       ← Validación visual e interactividad responsiva
 ├── views/                   ← Capa de Presentación (Vistas fuera del document root por seguridad)
+│   ├── templates/           ← Plantillas reutilizables (DRY)
+│   │   ├── header.php       ← Cabecera de página común y barra de navegación
+│   │   └── footer.php       ← Pie de página común y carga de scripts JS
 │   ├── 403.php              ← Vista: Página de error 403 (Acceso Prohibido) personalizada
 │   ├── 404.php              ← Vista: Página de error 404 personalizada
 │   ├── index.php            ← Vista: Formulario de registro de pacientes

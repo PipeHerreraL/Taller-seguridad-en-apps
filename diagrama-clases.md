@@ -42,6 +42,14 @@ classDiagram
             <<View>>
             +views/403.php
         }
+        class HeaderTemplate {
+            <<Partial>>
+            +views/templates/header.php
+        }
+        class FooterTemplate {
+            <<Partial>>
+            +views/templates/footer.php
+        }
     }
 
     namespace Helpers {
@@ -112,6 +120,16 @@ classDiagram
     FrontController ..> RegisterController : Invoca (/register)
     FrontController ..> DeleteController : Invoca (/delete)
     FrontController ..> Error404View : Carga (404 Fallback)
+    
+    %% ── Inclusión de Plantillas Comunes ─────────────────────────────
+    IndexView ..> HeaderTemplate : Incluye
+    IndexView ..> FooterTemplate : Incluye
+    PacientesView ..> HeaderTemplate : Incluye
+    PacientesView ..> FooterTemplate : Incluye
+    Error403View ..> HeaderTemplate : Incluye
+    Error403View ..> FooterTemplate : Incluye
+    Error404View ..> HeaderTemplate : Incluye
+    Error404View ..> FooterTemplate : Incluye
 
     %% ── Relaciones del Controlador (Lógica de Negocio) ──────────────
     RegisterController ..> Validator : Valida datos

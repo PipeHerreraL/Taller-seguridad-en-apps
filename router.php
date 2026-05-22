@@ -11,7 +11,7 @@ $publicDir = __DIR__ . '/public';
 $staticFile = $publicDir . $uri;
 
 // 1. Serve existing static files (css, js, images, fonts, etc.) from public/
-if ($uri !== '/' && file_exists($staticFile) && !is_dir($staticFile)) {
+if ($uri !== '/' && $uri !== '/index.php' && file_exists($staticFile) && !is_dir($staticFile)) {
     $ext = pathinfo($staticFile, PATHINFO_EXTENSION);
     
     // Security check: Never serve raw PHP files statically (prevents source code disclosure)
