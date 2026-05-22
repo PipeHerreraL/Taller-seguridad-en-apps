@@ -8,6 +8,9 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../autoload.php';
 
+// Registrar el logger para capturar cada petición al finalizar su ejecución (evita log injection)
+register_shutdown_function([\App\Helpers\Logger::class, 'logRequest']);
+
 // Obtener la ruta limpia de la URL
 $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 
@@ -27,5 +30,5 @@ if (isset($routes[$uri])) {
 
 // 404 - Página no encontrada
 http_response_code(404);
-echo '<h1>404 — Página no encontrada</h1>';
+include_once __DIR__ . '/../views/404.php';
 exit;

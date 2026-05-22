@@ -38,7 +38,7 @@ $tipoComun = array_key_first($tiposCount) ?? '—';
   <meta name="description" content="Lista completa de pacientes registrados en ClinicaApp.">
   <meta name="theme-color" content="#0f0f1a">
   <link rel="preload" href="assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="assets/css/styles.css?v=1.0.6">
+  <link rel="stylesheet" href="assets/css/styles.css?v=1.0.7">
 </head>
 <body>
 <nav class="navbar">

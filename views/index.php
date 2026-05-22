@@ -22,7 +22,7 @@ $generosList = ['Masculino', 'Femenino', 'Otro', 'Prefiero no decir'];
   <meta name="description" content="Sistema de registro de pacientes con PHP + MySQL.">
   <meta name="theme-color" content="#0f0f1a">
   <link rel="preload" href="assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="assets/css/styles.css?v=1.0.6">
+  <link rel="stylesheet" href="assets/css/styles.css?v=1.0.7">
 </head>
 <body>
 <nav class="navbar">

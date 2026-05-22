@@ -1,6 +1,11 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/autoload.php';
+
+// Registrar el logger para capturar cada petición al finalizar (evita duplicidad y previene log injection)
+register_shutdown_function([\App\Helpers\Logger::class, 'logRequest']);
+
 $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 $publicDir = __DIR__ . '/public';
 $staticFile = $publicDir . $uri;
@@ -12,7 +17,7 @@ if ($uri !== '/' && file_exists($staticFile) && !is_dir($staticFile)) {
     // Security check: Never serve raw PHP files statically (prevents source code disclosure)
     if ($ext === 'php') {
         http_response_code(403);
-        echo '<h1>403 — Acceso prohibido</h1>';
+        include_once __DIR__ . '/views/403.php';
         exit;
     }
 

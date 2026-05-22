@@ -154,11 +154,14 @@ composer test:coverage
 │       ├── fonts/           ← Fuentes de texto locales (Inter)
 │       └── js/main.js       ← Validación visual e interactividad responsiva
 ├── views/                   ← Capa de Presentación (Vistas fuera del document root por seguridad)
+│   ├── 403.php              ← Vista: Página de error 403 (Acceso Prohibido) personalizada
+│   ├── 404.php              ← Vista: Página de error 404 personalizada
 │   ├── index.php            ← Vista: Formulario de registro de pacientes
 │   └── pacientes.php        ← Vista: Tabla de pacientes registrados
 ├── controllers/             ← Capa de Control (Lógica POST oculta al exterior)
 │   ├── RegisterController.php
 │   └── DeleteController.php
+├── logs/                    ← Registro de solicitudes y auditoría (app.log)
 ├── src/                     ← Clases principales (Namespace App\)
 │   ├── Config/Database.php  ← Conexión única segura (Patrón Singleton PDO)
 │   ├── Models/Paciente.php  ← CRUD del Paciente y consultas parametrizadas

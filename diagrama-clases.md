@@ -34,6 +34,14 @@ classDiagram
             <<View>>
             +views/pacientes.php
         }
+        class Error404View {
+            <<View>>
+            +views/404.php
+        }
+        class Error403View {
+            <<View>>
+            +views/403.php
+        }
     }
 
     namespace Helpers {
@@ -97,11 +105,13 @@ classDiagram
 
     %% ── Enrutamiento y Flujo de Peticiones ──────────────────────────
     Router ..> FrontController : Delega peticiones dinámicas
+    Router ..> Error403View : Carga (403 Fallback)
     
     FrontController ..> IndexView : Carga (/)
     FrontController ..> PacientesView : Carga (/pacientes)
     FrontController ..> RegisterController : Invoca (/register)
     FrontController ..> DeleteController : Invoca (/delete)
+    FrontController ..> Error404View : Carga (404 Fallback)
 
     %% ── Relaciones del Controlador (Lógica de Negocio) ──────────────
     RegisterController ..> Validator : Valida datos
