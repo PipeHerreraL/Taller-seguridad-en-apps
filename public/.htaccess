@@ -4,6 +4,5 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 
-# Rewrite extensionless path to .php file if it exists
-RewriteCond %{REQUEST_FILENAME}.php -f
-RewriteRule ^([^\.]+)$ $1.php [NC,L]
+# Rewrite all other requests to the Front Controller
+RewriteRule ^(.*)$ index.php [QSA,L]

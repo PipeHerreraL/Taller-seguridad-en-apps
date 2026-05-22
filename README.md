@@ -148,16 +148,14 @@ composer test:coverage
 ```
 /
 ├── public/                  ← Raíz del servidor (Document Root)
-│   ├── views/               ← Vistas HTML/PHP del lado del cliente
-│   │   ├── index.php        ← Vista: Formulario de registro de pacientes
-│   │   └── pacientes.php    ← Vista: Tabla de pacientes registrados
-│   ├── controllers/         ← Scripts de enrutamiento/puente para controladores
-│   │   ├── register.php     ← Puente público para inserción de datos
-│   │   └── delete.php       ← Puente público para eliminación de datos
+│   ├── index.php            ← Front Controller: punto único de entrada para peticiones dinámicas
 │   └── assets/              ← Recursos estáticos
 │       ├── css/styles.css   ← Estilos y diseño responsivo adaptado
 │       ├── fonts/           ← Fuentes de texto locales (Inter)
 │       └── js/main.js       ← Validación visual e interactividad responsiva
+├── views/                   ← Capa de Presentación (Vistas fuera del document root por seguridad)
+│   ├── index.php            ← Vista: Formulario de registro de pacientes
+│   └── pacientes.php        ← Vista: Tabla de pacientes registrados
 ├── controllers/             ← Capa de Control (Lógica POST oculta al exterior)
 │   ├── RegisterController.php
 │   └── DeleteController.php

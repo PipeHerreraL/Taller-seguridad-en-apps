@@ -56,21 +56,6 @@ if ($uri !== '/' && file_exists($staticFile) && !is_dir($staticFile)) {
     exit;
 }
 
-// 2. Define custom routing map for the clean URLs to point to grouped views & controllers
-$routes = [
-    '/'          => '/views/index.php',
-    '/index'     => '/views/index.php',
-    '/pacientes' => '/views/pacientes.php',
-    '/register'  => '/controllers/register.php',
-    '/delete'    => '/controllers/delete.php'
-];
-
-if (isset($routes[$uri])) {
-    include_once $publicDir . $routes[$uri];
-    exit;
-}
-
-// 3. 404 fallback
-http_response_code(404);
-echo '<h1>404 — Página no encontrada</h1>';
+// 2. All other requests go to the Front Controller public/index.php
+include_once $publicDir . '/index.php';
 exit;

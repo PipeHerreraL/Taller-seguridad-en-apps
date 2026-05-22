@@ -1,42 +1,38 @@
 # Diagrama de Arquitectura y Clases — ClinicaApp
 
-El siguiente diagrama representa la arquitectura del proyecto basada en el patrón Modelo-Vista-Controlador (MVC), junto con sus componentes de infraestructura, utilidades y la suite de pruebas unitarias y de seguridad.
+El siguiente diagrama representa la arquitectura del proyecto basada en el patrón de **Front Controller** y **Modelo-Vista-Controlador (MVC)**, junto con sus componentes de infraestructura, utilidades y la suite de pruebas unitarias y de seguridad.
 
 ```mermaid
 classDiagram
-    direction TB
-
-    namespace Presentacion {
-        class IndexView {
-            <<View>>
-            +public/views/index.php
-        }
-        class PacientesView {
-            <<View>>
-            +public/views/pacientes.php
-        }
-    }
+    direction LR
 
     namespace Enrutamiento_y_Control {
         class Router {
             <<Script>>
             +router.php
         }
-        class RegisterBridge {
-            <<Bridge>>
-            +public/controllers/register.php
-        }
-        class DeleteBridge {
-            <<Bridge>>
-            +public/controllers/delete.php
+        class FrontController {
+            <<Script>>
+            +public/index.php
         }
         class RegisterController {
-            <<ControllerClass>>
+            <<Controller>>
             +controllers/RegisterController.php
         }
         class DeleteController {
-            <<ControllerClass>>
+            <<Controller>>
             +controllers/DeleteController.php
+        }
+    }
+
+    namespace Presentacion {
+        class IndexView {
+            <<View>>
+            +views/index.php
+        }
+        class PacientesView {
+            <<View>>
+            +views/pacientes.php
         }
     }
 
@@ -56,6 +52,9 @@ classDiagram
             +getErrors() array
             +hasErrors() bool
         }
+        class EnvLoader {
+            +load(path) void$
+        }
     }
 
     namespace Modelos_y_Datos {
@@ -74,9 +73,6 @@ classDiagram
             -connection : PDO
             +getInstance() Database$
             +getConnection() PDO
-        }
-        class EnvLoader {
-            +load(path) void$
         }
     }
 
@@ -99,24 +95,24 @@ classDiagram
         }
     }
 
-    %% ── Relaciones de Enrutamiento y Presentación ───────────────────
-    Router ..> IndexView : Renderiza GET (/)
-    Router ..> PacientesView : Renderiza GET (/pacientes)
-    Router ..> RegisterBridge : Enruta POST (/register)
-    Router ..> DeleteBridge : Enruta POST (/delete)
+    %% ── Enrutamiento y Flujo de Peticiones ──────────────────────────
+    Router ..> FrontController : Delega peticiones dinámicas
+    
+    FrontController ..> IndexView : Carga (/)
+    FrontController ..> PacientesView : Carga (/pacientes)
+    FrontController ..> RegisterController : Invoca (/register)
+    FrontController ..> DeleteController : Invoca (/delete)
 
-    RegisterBridge ..> RegisterController : Carga
-    DeleteBridge ..> DeleteController : Carga
-
-    %% ── Relaciones de Negocio y Datos (Capa de Lógica) ────────────────
+    %% ── Relaciones del Controlador (Lógica de Negocio) ──────────────
     RegisterController ..> Validator : Valida datos
-    RegisterController ..> Paciente : Crea paciente
-    DeleteController ..> Paciente : Elimina paciente
+    RegisterController ..> Paciente : Crea registro
+    DeleteController ..> Paciente : Elimina registro
 
-    Paciente ..> Database : Obtiene conexión
+    %% ── Acceso a Datos e Infraestructura ────────────────────────────
+    Paciente ..> Database : Obtiene conexión PDO
     Database ..> EnvLoader : Carga variables (.env)
 
-    %% ── Relaciones de Pruebas ────────────────────────────────────────
-    SqlInjectionTest ..> Paciente : Valida seguridad SQLi
-    ValidatorTest ..> Validator : Valida reglas de negocio
+    %% ── Suite de Pruebas Automatizadas ──────────────────────────────
+    SqlInjectionTest ..> Paciente : Audita seguridad SQLi
+    ValidatorTest ..> Validator : Audita reglas de validación
 ```

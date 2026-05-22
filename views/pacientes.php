@@ -3,7 +3,7 @@ declare(strict_types=1);
 /**
  * public/views/pacientes.php — Vista: Listado y gestión de pacientes registrados.
  */
-require_once __DIR__ . '/../../autoload.php';
+require_once __DIR__ . '/../autoload.php';
 use App\Models\Paciente;
 session_start();
 $success = $_SESSION['success'] ?? null;

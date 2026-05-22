@@ -3,7 +3,7 @@ declare(strict_types=1);
 /**
  * public/views/index.php — Vista: Página de registro de pacientes.
  */
-require_once __DIR__ . '/../../autoload.php';
+require_once __DIR__ . '/../autoload.php';
 session_start();
 $success = $_SESSION['success'] ?? null;
 $errors  = $_SESSION['errors']  ?? [];
